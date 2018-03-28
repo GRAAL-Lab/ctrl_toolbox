@@ -15,6 +15,8 @@ endif()
 # Define library. Only source files here!
 project(ctrl_toolbox VERSION 0.1 LANGUAGES CXX)
 
+option(BUILD_TESTS "Compile tests" OFF)
+
 add_library(ctrl_toolbox SHARED
     src/DigitalPID.cc
 )

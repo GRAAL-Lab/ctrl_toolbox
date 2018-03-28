@@ -13,8 +13,10 @@
 namespace ctb {
 
 DigitalPID::DigitalPID() :
-		Kp_(0), Ki_(0), Kd_(0), Kff_(0), Ts_(1), uMax_(0), N_(10), Tr_(0.5), isHeadingControl_(false), initialized_(
+		Kp_(0), Ki_(0), Kd_(0), Kff_(0), Ts_(1), uMax_(0), N_(10), Tr_(0.5), initialized_(
 				false) {
+
+	SetErrorFunction(DifferenceFunctor<float64_t>());
 	Reset();
 }
 
@@ -89,7 +91,7 @@ float64_t DigitalPID::Compute(float64_t ref, float64_t fbk) {
 		y[0] = fbk;
 	} else {
 		//ortos::DebugConsole::Write(ortos::LogLevel::info, "DigitalPID::Compute", "Initializing variables");
-		// TODO e[0] = e[1] = e[2] = GetHeadingDifference(fbk, ref);
+		e[0] = e[1] = e[2] = ErrorFunction_(ref, fbk);
 		u[1] = u[0] = 0;
 		y[1] = y[0] = fbk;
 		initialized_ = true;
@@ -97,13 +99,9 @@ float64_t DigitalPID::Compute(float64_t ref, float64_t fbk) {
 
 
 	float64_t ydiff;
-	/*if (isHeadingControl_) {
-		e[0] = GetHeadingDifference(fbk, ref);
-		ydiff = GetHeadingDifference(y[1], y[0]);
-	} else*/ {
-		e[0] = ref - fbk;
-		ydiff = y[0] - y[1];
-	}
+	e[0] = ErrorFunction_(ref, fbk);
+	ydiff = ErrorFunction_(y[0], y[1]);
+
 
 	if (Kd_ != 0 && Kp_ != 0) {
 		float64_t Td = Kd_ / Kp_;

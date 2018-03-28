@@ -9,6 +9,8 @@
 #define SRC_CTRL_DIGITALPID_H_
 
 #include <cstdint>
+#include <functional>
+
 //#include "Defines.h"
 //#include "OM2CtrlDataStructs.h"
 
@@ -30,6 +32,12 @@ struct PIDGains {
 	float64_t Tr; // tracking time constant for anti-windup
 };
 
+template <typename T>
+struct DifferenceFunctor {
+	T operator()(T a, T b){
+		return (a - b);
+	}
+};
 
 class DigitalPID {
 public:
@@ -51,16 +59,18 @@ public:
 		uMax_ = uMax;
 	}
 
-	void SetHeadingController() {
-		isHeadingControl_ = true;
-	}
-
 	void Reset();
 
 	float64_t Compute(float64_t error);
 	float64_t Compute(float64_t ref, float64_t fbk);
 
 	virtual ~DigitalPID();
+
+	void SetErrorFunction(const std::function<float64_t(float64_t, float64_t)>& errorFunction)
+	{
+		ErrorFunction_ = errorFunction;
+		//useExternalErrorFunction_ = true;
+	}
 
 private:
 	float64_t Kp_, Ki_, Kd_, Kff_;
@@ -70,7 +80,8 @@ private:
 	float64_t e[3];
 	float64_t y[2];
 	float64_t D_, I_, N_, Tr_;
-	bool isHeadingControl_;
+	//bool useExternalErrorFunction_ = {false};
+	std::function<float64_t(float64_t, float64_t)> ErrorFunction_;
 	bool initialized_;
 };
 
