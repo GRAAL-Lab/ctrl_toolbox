@@ -1,4 +1,4 @@
-[comment]: //!\mainpage "ReadMe"
+[comment]: //!\mainpage "Main Page"
 
 # Control Toolbox
 This library is a collection of control tools such as PID and adaptive controllers and signal filtering. The namespace enclosing all the library facilites is \p ctb (Control Tool Box).

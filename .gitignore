@@ -172,6 +172,7 @@ msg/_*.py
 **/html
 **/latex
 doxygen_sqlite3.db
+.tmp
 
 
 # eclipse stuff

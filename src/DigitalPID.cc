@@ -26,11 +26,11 @@ DigitalPID::~DigitalPID() {
 void DigitalPID::Reset() {
 	int i;
 	for (i = 0; i < 3; i++) {
-		e[i] = 0;
+		e_[i] = 0;
 	}
 	for (i = 0; i < 2; i++) {
-		u[i] = 0;
-		y[i] = 0;
+		u_[i] = 0;
+		y_[i] = 0;
 	}
 
 	D_ = 0;
@@ -42,44 +42,44 @@ double DigitalPID::Compute(double ref, double fbk) {
 	int i;
 	if (initialized_) {
 		for (i = 2; i > 0; i--) {
-			e[i] = e[i - 1];
+			e_[i] = e_[i - 1];
 		}
-		u[1] = u[0];
-		y[1] = y[0];
-		y[0] = fbk;
+		u_[1] = u_[0];
+		y_[1] = y_[0];
+		y_[0] = fbk;
 	} else {
 		//ortos::DebugConsole::Write(ortos::LogLevel::info, "DigitalPID::Compute", "Initializing variables");
-		e[0] = e[1] = e[2] = ErrorFunction_(ref, fbk);
-		u[1] = u[0] = 0;
-		y[1] = y[0] = fbk;
+		e_[0] = e_[1] = e_[2] = ErrorFunction_(ref, fbk);
+		u_[1] = u_[0] = 0;
+		y_[1] = y_[0] = fbk;
 		initialized_ = true;
 	}
 
 	double ydiff;
-	e[0] = ErrorFunction_(ref, fbk);
-	ydiff = ErrorFunction_(y[0], y[1]);
+	e_[0] = ErrorFunction_(ref, fbk);
+	ydiff = ErrorFunction_(y_[0], y_[1]);
 
 	if (Kd_ != 0 && Kp_ != 0) {
 		double Td = Kd_ / Kp_;
 		D_ = Td / (Td + N_ * Ts_) * D_ - Kp_ * Td * N_ / (Td + N_ * Ts_) * (ydiff);
 	}
 
-	double v = Kp_ * e[0] + I_ + D_ + Kff_ * ref;
+	double v = Kp_ * e_[0] + I_ + D_ + Kff_ * ref;
 	if (std::abs(v) > uMax_) {
-		u[0] = v / std::abs(v) * uMax_;
+		u_[0] = v / std::abs(v) * uMax_;
 	} else {
-		u[0] = v;
+		u_[0] = v;
 	}
 
 	//ortos::DebugConsole::Write(ortos::LogLevel::info, "DigitalPID::Compute",
 	//		"e = %+lf I = %+lf D = %+lf uff = %+lf v = %+lf u = %+lf ydiff = %+lf", e[0], I_, D_, Kff_ * ref, v, u[0], ydiff);
 	if (Ki_ != 0) {
-		I_ = I_ + (Ki_ * Ts_) * e[0] + (Ts_ / Tr_) * (u[0] - v);
+		I_ = I_ + (Ki_ * Ts_) * e_[0] + (Ts_ / Tr_) * (u_[0] - v);
 	} else {
 		I_ = 0;
 	}
 
-	return u[0];
+	return u_[0];
 
 }
 
