@@ -31,7 +31,7 @@ set_target_properties(ctrl_toolbox PROPERTIES LINKER_LANGUAGE CXX)
 # paths.
 target_include_directories(ctrl_toolbox PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-   # $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/rml>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/ctrl_toolbox>
     $<INSTALL_INTERFACE:include>
     PRIVATE src)
 

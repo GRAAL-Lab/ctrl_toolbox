@@ -12,10 +12,10 @@
 
 namespace ctb {
 
-DigitalPID::DigitalPID() :
-		Kp_(0), Ki_(0), Kd_(0), Kff_(0), Ts_(1), uMax_(0), N_(10), Tr_(0.5), initialized_(
-				false) {
+DigitalPID::DigitalPID(const PIDGains& gains, double sampleTime, double saturation) :
+		Ts_(sampleTime), uMax_(saturation), initialized_(false) {
 
+	SetGains(gains);
 	SetErrorFunction(DifferenceFunctor<double>());
 	Reset();
 }
@@ -39,6 +39,7 @@ void DigitalPID::Reset() {
 	initialized_ = false;
 }
 
+/*
 double DigitalPID::Compute(double error) {
 	int i;
 	if (initialized_) {
@@ -79,7 +80,7 @@ double DigitalPID::Compute(double error) {
 	return u[0];
 
 }
-
+*/
 double DigitalPID::Compute(double ref, double fbk) {
 	int i;
 	if (initialized_) {
@@ -97,11 +98,9 @@ double DigitalPID::Compute(double ref, double fbk) {
 		initialized_ = true;
 	}
 
-
 	double ydiff;
 	e[0] = ErrorFunction_(ref, fbk);
 	ydiff = ErrorFunction_(y[0], y[1]);
-
 
 	if (Kd_ != 0 && Kp_ != 0) {
 		double Td = Kd_ / Kp_;
@@ -117,7 +116,6 @@ double DigitalPID::Compute(double ref, double fbk) {
 
 	//ortos::DebugConsole::Write(ortos::LogLevel::info, "DigitalPID::Compute",
 	//		"e = %+lf I = %+lf D = %+lf uff = %+lf v = %+lf u = %+lf ydiff = %+lf", e[0], I_, D_, Kff_ * ref, v, u[0], ydiff);
-
 	if (Ki_ != 0) {
 		I_ = I_ + (Ki_ * Ts_) * e[0] + (Ts_ / Tr_) * (u[0] - v);
 	} else {
