@@ -16,7 +16,7 @@ DigitalPID::DigitalPID() :
 		Kp_(0), Ki_(0), Kd_(0), Kff_(0), Ts_(1), uMax_(0), N_(10), Tr_(0.5), initialized_(
 				false) {
 
-	SetErrorFunction(DifferenceFunctor<float64_t>());
+	SetErrorFunction(DifferenceFunctor<double>());
 	Reset();
 }
 
@@ -39,7 +39,7 @@ void DigitalPID::Reset() {
 	initialized_ = false;
 }
 
-float64_t DigitalPID::Compute(float64_t error) {
+double DigitalPID::Compute(double error) {
 	int i;
 	if (initialized_) {
 		for (i = 2; i > 0; i--) {
@@ -55,12 +55,12 @@ float64_t DigitalPID::Compute(float64_t error) {
 	}
 
 	if (Kd_ != 0 && Kp_ != 0) {
-		float64_t Td = Kd_ / Kp_;
+		double Td = Kd_ / Kp_;
 		D_ = Td / (Td + N_ * Ts_) * D_ + Kp_ * Td * N_ / (Td + N_ * Ts_) * (e[0] - e[1]);
 		//D_ = Kd_ / Ts_ * (e[0] - e[1]);
 	}
 
-	float64_t v = Kp_ * e[0] + I_ + D_;
+	double v = Kp_ * e[0] + I_ + D_;
 	if (std::abs(v) > uMax_) {
 		u[0] = v / std::abs(v) * uMax_;
 	} else {
@@ -80,7 +80,7 @@ float64_t DigitalPID::Compute(float64_t error) {
 
 }
 
-float64_t DigitalPID::Compute(float64_t ref, float64_t fbk) {
+double DigitalPID::Compute(double ref, double fbk) {
 	int i;
 	if (initialized_) {
 		for (i = 2; i > 0; i--) {
@@ -98,17 +98,17 @@ float64_t DigitalPID::Compute(float64_t ref, float64_t fbk) {
 	}
 
 
-	float64_t ydiff;
+	double ydiff;
 	e[0] = ErrorFunction_(ref, fbk);
 	ydiff = ErrorFunction_(y[0], y[1]);
 
 
 	if (Kd_ != 0 && Kp_ != 0) {
-		float64_t Td = Kd_ / Kp_;
+		double Td = Kd_ / Kp_;
 		D_ = Td / (Td + N_ * Ts_) * D_ - Kp_ * Td * N_ / (Td + N_ * Ts_) * (ydiff);
 	}
 
-	float64_t v = Kp_ * e[0] + I_ + D_ + Kff_ * ref;
+	double v = Kp_ * e[0] + I_ + D_ + Kff_ * ref;
 	if (std::abs(v) > uMax_) {
 		u[0] = v / std::abs(v) * uMax_;
 	} else {

@@ -11,25 +11,16 @@
 #include <cstdint>
 #include <functional>
 
-//#include "Defines.h"
-//#include "OM2CtrlDataStructs.h"
-
-typedef float float32_t;
-typedef double float64_t;
-
-#define M_PIl_OVER_180        (PI / 180.0)
-#define M_180_OVER_M_PIl      (180.0 / PI)
-
 namespace ctb
 {
 
 struct PIDGains {
-	float64_t Kp;
-	float64_t Ki;
-	float64_t Kd;
-	float64_t Kff;
-	float64_t N; // maximum gain for derivative part
-	float64_t Tr; // tracking time constant for anti-windup
+	double Kp;
+	double Ki;
+	double Kd;
+	double Kff;
+	double N; // maximum gain for derivative part
+	double Tr; // tracking time constant for anti-windup
 };
 
 template <typename T>
@@ -51,37 +42,37 @@ public:
 		Tr_ = g.Tr;
 	}
 
-	void SetSampleTime(float64_t Ts) {
+	void SetSampleTime(double Ts) {
 		Ts_ = Ts;
 	}
 
-	void SetSaturation(float64_t uMax) {
+	void SetSaturation(double uMax) {
 		uMax_ = uMax;
 	}
 
 	void Reset();
 
-	float64_t Compute(float64_t error);
-	float64_t Compute(float64_t ref, float64_t fbk);
+	double Compute(double error);
+	double Compute(double ref, double fbk);
 
 	virtual ~DigitalPID();
 
-	void SetErrorFunction(const std::function<float64_t(float64_t, float64_t)>& errorFunction)
+	void SetErrorFunction(const std::function<double(double, double)>& errorFunction)
 	{
 		ErrorFunction_ = errorFunction;
 		//useExternalErrorFunction_ = true;
 	}
 
 private:
-	float64_t Kp_, Ki_, Kd_, Kff_;
-	float64_t Ts_;
-	float64_t uMax_;
-	float64_t u[2];
-	float64_t e[3];
-	float64_t y[2];
-	float64_t D_, I_, N_, Tr_;
+	double Kp_, Ki_, Kd_, Kff_;
+	double Ts_;
+	double uMax_;
+	double u[2];
+	double e[3];
+	double y[2];
+	double D_, I_, N_, Tr_;
 	//bool useExternalErrorFunction_ = {false};
-	std::function<float64_t(float64_t, float64_t)> ErrorFunction_;
+	std::function<double(double, double)> ErrorFunction_;
 	bool initialized_;
 };
 
