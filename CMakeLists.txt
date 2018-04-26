@@ -22,7 +22,7 @@ add_library(ctrl_toolbox SHARED
     src/VirtualFrame.cc
 )
 
-add_dependencies(ctrl_toolbox rml)
+target_link_libraries(ctrl_toolbox rml)
 
 #add_library(youBotModel include/test/youbot_armmodel.cc
 #)
