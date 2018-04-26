@@ -6,3 +6,7 @@ The list of components is the following:
 
 1. PID Controller: ctb::DigitalPID
 2. Virtual Frame: ctb::VirtualFrame
+
+## Dependencies
+
+* RML: Robotic Mathematical Library (https://bitbucket.org/isme_robotics/rml/src)
