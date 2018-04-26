@@ -19,7 +19,10 @@ option(BUILD_TESTS "Compile tests" OFF)
 
 add_library(ctrl_toolbox SHARED
     src/DigitalPID.cc
+    src/VirtualFrame.cc
 )
+
+add_dependencies(ctrl_toolbox rml)
 
 #add_library(youBotModel include/test/youbot_armmodel.cc
 #)
