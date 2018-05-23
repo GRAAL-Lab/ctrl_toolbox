@@ -1,16 +1,17 @@
+#include <signal.h>
+#include <unistd.h>
 #include <VirtualFrame.h>
 #include <iostream>
 #include <thread>
 
-#include <signal.h>
-#include <unistd.h>
+#include "ctrl_toolbox_internal/Futils.h"
 
 volatile sig_atomic_t stop;
 
 void inthand(int signum)
 {
     stop = 1;
-    std::cout << "\nBye byeeee!" << std::endl;
+    std::cout << "\nBye byeeee! (signum: " << signum << ")" << std::endl;
 }
 
 int main(int, char**)
