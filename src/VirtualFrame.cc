@@ -15,8 +15,7 @@ VirtualFrame::VirtualFrame() :
 {
 	virtualFrameGain_ = 0;
 	sampleTime_ = 0;
-
-
+    maximumAllowedDistance_ = 0.2;
 }
 
 void VirtualFrame::SetSampleTime(double sampleTime)
@@ -42,7 +41,7 @@ void VirtualFrame::ResetState(const Eigen::TransfMatrix& wTv)
 
 void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMatrix& wTg, Eigen::TransfMatrix& wTv)
 {
-	virtualFrameToGoalError_ = rml::CartesianError(wTg, wTv_);
+    virtualFrameToGoalError_ = rml::CartesianError(wTv_, wTg);
 
 
 	if (useErrorNorm == true) {
@@ -65,7 +64,7 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMa
 
 void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::Vector6d& xdotbar, Eigen::TransfMatrix& wTv)
 {
-	toolToVirtualFrameError_ = rml::CartesianError(wTv, wTt);
+    toolToVirtualFrameError_ = rml::CartesianError(wTt, wTv);
 
 	//std::cout.precision(3);
 	//std::cout << "toolToVfError: " << toolToVirtualFrameError_.GetSecondVect3().norm() << "\t";
@@ -73,7 +72,7 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::Vector6d
 
 	/// virtual frame is getting away from tool frame
 	if ((toolToVirtualFrameError_ + xdotbar * sampleTime_).norm() > toolToVirtualFrameError_.norm()) {
-		virtualFrameVelocity_ = xdotbar * rml::DecreasingBellShapedFunction(0.00, 0.02, 0, 1, toolToVirtualFrameError_.norm());
+        virtualFrameVelocity_ = xdotbar * rml::DecreasingBellShapedFunction(0.00, maximumAllowedDistance_, 0, 1, toolToVirtualFrameError_.norm());
 	} else {
 		virtualFrameVelocity_ = xdotbar;
 	}

@@ -70,9 +70,9 @@ export(TARGETS ctrl_toolbox FILE ctrl_toolboxConfig.cmake)
 
 if(BUILD_TESTS)
     # Every library has unit tests, of course
-    #add_executable(taskTestFSM src/taskTestFSM.cc)
+    add_executable(ctrl_toolbox_test test/ctrl_toolbox_test.cc)
     
-    #target_link_libraries(taskTestFSM fsm)
+    target_link_libraries(ctrl_toolbox_test ctrl_toolbox)
     
-    #add_test(taskTestFSM taskTestFSM)
+    add_test(ctrl_toolbox_test ctrl_toolbox_test)
 endif(BUILD_TESTS)

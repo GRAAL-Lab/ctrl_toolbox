@@ -29,6 +29,7 @@ private:
 
 	double sampleTime_;
 	double virtualFrameGain_;
+    double maximumAllowedDistance_;
 	Eigen::Vector6d toolToVirtualFrameError_;
 	Eigen::Vector6d virtualFrameToGoalError_;
 	Eigen::Vector6d normalizedVirtualFrameToGoalError_;
@@ -100,6 +101,11 @@ public:
 	{
 		this->useErrorNorm = useErrorNorm;
 	}
+
+    void SetMaximumAllowedDistance(double dist)
+    {
+        this->maximumAllowedDistance_ = dist;
+    }
 
 	const Eigen::Vector6d& getVirtualFrameToGoalError() const
 	{
