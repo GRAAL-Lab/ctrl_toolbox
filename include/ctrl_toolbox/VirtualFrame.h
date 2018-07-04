@@ -23,24 +23,8 @@ namespace ctb {
  * A mechanism is implemented to avoid that the virtual frame "runs away" too much from the tool frame.
  */
 class VirtualFrame {
-
-  enum VFType { FullPose, Angular, Linear };
-
-private:
-    double sampleTime_;
-    double virtualFrameGain_;
-    double maximumAllowedDistance_;
-    Eigen::Vector6d toolToVirtualFrameError_;
-    Eigen::Vector6d virtualFrameToGoalError_;
-    Eigen::Vector6d normalizedVirtualFrameToGoalError_;
-    Eigen::Vector6d virtualFrameVelocity_;
-    Eigen::TransfMatrix wTv_;
-    VFType vftype_;
-
-
-    bool useErrorNorm;
-
 public:
+  enum VFType { FullPose, Angular, Linear };
   /**
 	 * @brief Default constructor
 	 */
@@ -122,6 +106,19 @@ public:
     {
         return wTv_;
     }
+private:
+    double sampleTime_;
+    double virtualFrameGain_;
+    double maximumAllowedDistance_;
+    Eigen::Vector6d toolToVirtualFrameError_;
+    Eigen::Vector6d virtualFrameToGoalError_;
+    Eigen::Vector6d normalizedVirtualFrameToGoalError_;
+    Eigen::Vector6d virtualFrameVelocity_;
+    Eigen::TransfMatrix wTv_;
+    VFType vftype_;
+
+
+    bool useErrorNorm;
 };
 }
 
