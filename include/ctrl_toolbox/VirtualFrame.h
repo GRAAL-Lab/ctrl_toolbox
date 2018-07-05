@@ -37,7 +37,6 @@ private:
     Eigen::TransfMatrix wTv_;
     VFType vftype_;
 
-
     bool useErrorNorm;
 
 public:

@@ -13,8 +13,8 @@ VirtualFrame::VirtualFrame(VFType vft)
     : vftype_(vft)
     , useErrorNorm(false)
 {
-    virtualFrameGain_ = 0;
-    sampleTime_ = 0;
+    virtualFrameGain_ = 0.0;
+    sampleTime_ = 0.0;
     maximumAllowedDistance_ = 0.2;
 }
 
@@ -41,6 +41,10 @@ void VirtualFrame::ResetState(const Eigen::TransfMatrix& wTv)
 
 void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMatrix& wTg, Eigen::TransfMatrix& wTv)
 {
+    if (virtualFrameGain_ == 0.0 || sampleTime_ == 0.0) {
+        std::cerr << "WARNING: No virtualFrameGain and/or sampleTime set!!" << std::endl;
+    }
+
     virtualFrameToGoalError_ = rml::CartesianError(wTv_, wTg);
 
     if (useErrorNorm == true) {
@@ -70,7 +74,6 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::Vector6d
     //std::cout << "VfToGoalError: " << virtualFrameToGoalError_.GetSecondVect3().norm() << std::endl;
 
     /// Virtual frame is getting away from tool frame
-
     bool outOfReach = false;
     Eigen::Vector3d error3d, xdotbar3d;
 
