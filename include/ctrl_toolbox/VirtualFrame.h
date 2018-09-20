@@ -23,6 +23,7 @@ namespace ctb {
  * A mechanism is implemented to avoid that the virtual frame "runs away" too much from the tool frame.
  */
 class VirtualFrame {
+
 public:
     enum VFType { FullPose,
         Angular,
@@ -128,6 +129,7 @@ private:
     Eigen::TransfMatrix wTv_;
     VFType vftype_;
     Eigen::TransfMatrix wTg_;
+
     bool useErrorNorm;
 };
 }

@@ -13,12 +13,14 @@ VirtualFrame::VirtualFrame(VFType vft)
     : vftype_(vft)
     , useErrorNorm(false)
 {
+
     virtualFrameGain_ = 0;
     sampleTime_ = 0;
     onTrackAllowedDistance_(0) = 4.0;
     onTrackAllowedDistance_(1) = 4.5;
     crossTrackAllowedDistance_(0) = 1.0;
     crossTrackAllowedDistance_(1) = 1.5;
+
 }
 
 void VirtualFrame::SetSampleTime(double sampleTime)
@@ -54,8 +56,13 @@ void VirtualFrame::ResetState(const Eigen::TransfMatrix& wTv)
 
 void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMatrix& wTg, Eigen::TransfMatrix& wTv)
 {
+
     wTg_ = wTg;
-    virtualFrameToGoalError_ = rml::CartesianError(wTv_, wTg_);
+    if (virtualFrameGain_ == 0.0 || sampleTime_ == 0.0) {
+        std::cerr << "WARNING: No virtualFrameGain and/or sampleTime set!!" << std::endl;
+    }
+
+    virtualFrameToGoalError_ = rml::CartesianError(wTv_, wTg);
 
 
     if (useErrorNorm == true) {
@@ -79,6 +86,7 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMa
 void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::Vector6d& xdotbar, Eigen::TransfMatrix& wTv)
 {
     toolToVirtualFrameError_ = rml::CartesianError(wTt, wTv);
+
     bool outOfReach = false;
     Eigen::Vector3d errorLinear, xdotbarLinear;
     if (vftype_ == Linear || vftype_ == FullPose) {
