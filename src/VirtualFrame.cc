@@ -15,7 +15,10 @@ VirtualFrame::VirtualFrame(VFType vft)
 {
     virtualFrameGain_ = 0;
     sampleTime_ = 0;
-    maximumAllowedDistance_ = 0.2;
+    onTrackAllowedDistance_(0) = 4.0;
+    onTrackAllowedDistance_(1) = 4.5;
+    crossTrackAllowedDistance_(0) = 1.0;
+    crossTrackAllowedDistance_(1) = 1.5;
 }
 
 void VirtualFrame::SetSampleTime(double sampleTime)
@@ -33,6 +36,16 @@ void VirtualFrame::ResetState()
     toolToVirtualFrameError_.setZero();
 }
 
+void VirtualFrame::SetOnTrackAllowedDistance(Eigen::Vector2d onTrackAllowedDistance)
+{
+    onTrackAllowedDistance_ = onTrackAllowedDistance;
+}
+
+void VirtualFrame::SetCrossTrackAllowedDistance(Eigen::Vector2d crossTrackAllowedDistance)
+{
+    crossTrackAllowedDistance_ = crossTrackAllowedDistance;
+}
+
 void VirtualFrame::ResetState(const Eigen::TransfMatrix& wTv)
 {
     wTv_ = wTv;
@@ -41,7 +54,9 @@ void VirtualFrame::ResetState(const Eigen::TransfMatrix& wTv)
 
 void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMatrix& wTg, Eigen::TransfMatrix& wTv)
 {
-    virtualFrameToGoalError_ = rml::CartesianError(wTv_, wTg);
+    wTg_ = wTg;
+    virtualFrameToGoalError_ = rml::CartesianError(wTv_, wTg_);
+
 
     if (useErrorNorm == true) {
         normalizedVirtualFrameToGoalError_ = virtualFrameToGoalError_;
@@ -64,46 +79,28 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMa
 void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::Vector6d& xdotbar, Eigen::TransfMatrix& wTv)
 {
     toolToVirtualFrameError_ = rml::CartesianError(wTt, wTv);
-
-    //std::cout.precision(3);
-    //std::cout << "toolToVfError: " << toolToVirtualFrameError_.GetSecondVect3().norm() << "\t";
-    //std::cout << "VfToGoalError: " << virtualFrameToGoalError_.GetSecondVect3().norm() << std::endl;
-
-    /// Virtual frame is getting away from tool frame
-
     bool outOfReach = false;
-    Eigen::Vector3d error3d, xdotbar3d;
-
-    if (vftype_ == FullPose) {
-        if ((toolToVirtualFrameError_ + xdotbar * sampleTime_).norm() > toolToVirtualFrameError_.norm()) {
+    Eigen::Vector3d errorLinear, xdotbarLinear;
+    if (vftype_ == Linear || vftype_ == FullPose) {
+        errorLinear = toolToVirtualFrameError_.GetSecondVect3();
+        xdotbarLinear = xdotbar.GetSecondVect3();
+        if ((errorLinear + xdotbarLinear * sampleTime_).norm() > errorLinear.norm()) {
             outOfReach = true;
-            virtualFrameVelocity_ = xdotbar * rml::DecreasingBellShapedFunction(0.00, maximumAllowedDistance_, 0, 1, toolToVirtualFrameError_.norm());
-        }
-    } else if (vftype_ == Angular) {
-        error3d = toolToVirtualFrameError_.GetFirstVect3();
-        xdotbar3d = xdotbar.GetFirstVect3();
-        if ((error3d + xdotbar3d * sampleTime_).norm() > error3d.norm()) {
-            outOfReach = true;
-            //virtualFrameVelocity_.SetSecondVect3(Eigen::Vector3d(0, 0, 0));
-            virtualFrameVelocity_.SetFirstVect3(xdotbar3d * rml::DecreasingBellShapedFunction(0.00, maximumAllowedDistance_, 0, 1, error3d.norm()));
-        }
-    } else if (vftype_ == Linear) {
-        error3d = toolToVirtualFrameError_.GetSecondVect3();
-        xdotbar3d = xdotbar.GetSecondVect3();
-        if ((error3d + xdotbar3d * sampleTime_).norm() > error3d.norm()) {
-            outOfReach = true;
-            //virtualFrameVelocity_.SetFirstVect3(Eigen::Vector3d(0, 0, 0));
-            virtualFrameVelocity_.SetSecondVect3(xdotbar3d * rml::DecreasingBellShapedFunction(0.00, maximumAllowedDistance_, 0, 1, error3d.norm()));
+            Eigen::Vector3d n_vg = (wTg_.GetTransl() - wTv.GetTransl()).normalized();
+            Eigen::Vector3d error_track = (n_vg * n_vg.transpose()) * errorLinear;
+            Eigen::Vector3d error_cross = (Eigen::Matrix3d::Identity() - n_vg * n_vg.transpose()) * errorLinear;;
+            double sigma;
+            double sigmaTrack = rml::DecreasingBellShapedFunction(onTrackAllowedDistance_(0), onTrackAllowedDistance_(1), 0, 1, error_track.norm());
+            double sigmaCross = rml::DecreasingBellShapedFunction(crossTrackAllowedDistance_(0), onTrackAllowedDistance_(1), 0, 1, error_cross.norm());
+            sigma = std::min(sigmaTrack, sigmaCross);
+            virtualFrameVelocity_.SetSecondVect3(xdotbarLinear * sigma);
         }
     }
-
-    if (!outOfReach) {
+   if (!outOfReach) {
         virtualFrameVelocity_ = xdotbar;
     }
-
     // move the virtual frame
     wTv_ = wTv_.Integral(virtualFrameVelocity_, sampleTime_);
-
     wTv = wTv_;
 }
 }

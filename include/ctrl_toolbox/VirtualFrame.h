@@ -24,13 +24,15 @@ namespace ctb {
  */
 class VirtualFrame {
 public:
-  enum VFType { FullPose, Angular, Linear };
-  /**
+    enum VFType { FullPose,
+        Angular,
+        Linear };
+    /**
 	 * @brief Default constructor
 	 */
     VirtualFrame(VFType vft = FullPose);
 
-  /**
+    /**
 	 * @brief Set the integration sample time
 	 * Sets the integration sample time which is used by the Compute calls. This time should be the interval between two
 	 * consecutive calls to the Compute method, i.e. typically the sample time of the task itself, assuming the virtual frame
@@ -87,10 +89,17 @@ public:
         this->useErrorNorm = useErrorNorm;
     }
 
-    void SetMaximumAllowedDistance(double dist)
-    {
-        this->maximumAllowedDistance_ = dist;
-    }
+    /**
+     * @brief Method setting the on track thresholds
+     * @param onTrackAllowedDistance on track thresholds
+     */
+    void SetOnTrackAllowedDistance(Eigen::Vector2d onTrackAllowedDistance);
+
+    /**
+     * @brief Method setting the cross track thresholds
+     * @param crossTrackAllowedDistance cross track thresholds
+     */
+    void SetCrossTrackAllowedDistance(Eigen::Vector2d crossTrackAllowedDistance);
 
     const Eigen::Vector6d& getVirtualFrameToGoalError() const
     {
@@ -106,18 +115,19 @@ public:
     {
         return wTv_;
     }
+
 private:
     double sampleTime_;
     double virtualFrameGain_;
-    double maximumAllowedDistance_;
+    Eigen::Vector2d onTrackAllowedDistance_;
+    Eigen::Vector2d crossTrackAllowedDistance_;
     Eigen::Vector6d toolToVirtualFrameError_;
     Eigen::Vector6d virtualFrameToGoalError_;
     Eigen::Vector6d normalizedVirtualFrameToGoalError_;
     Eigen::Vector6d virtualFrameVelocity_;
     Eigen::TransfMatrix wTv_;
     VFType vftype_;
-
-
+    Eigen::TransfMatrix wTg_;
     bool useErrorNorm;
 };
 }
