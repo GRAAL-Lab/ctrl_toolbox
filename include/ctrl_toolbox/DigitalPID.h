@@ -132,6 +132,7 @@ private:
 	double I_;		//!< Integral Term
 	std::function<double(double, double)> ErrorFunction_; //!< Definition of the error function that is used in Compute()
 	bool initialized_;	//!< Utility variable to check if the PID has been Reset()
+    bool TrToBeSetted_{false};
 };
 
 }
