@@ -94,14 +94,22 @@ public:
      * @brief Method setting the on track thresholds
      * @param onTrackAllowedDistance on track thresholds
      */
-    void SetOnTrackAllowedDistance(Eigen::Vector2d onTrackAllowedDistance);
+    void SetOnTrackAllowedDistance(Eigen::VectorXd onTrackAllowedDistance);
 
     /**
      * @brief Method setting the cross track thresholds
      * @param crossTrackAllowedDistance cross track thresholds
      */
-    void SetCrossTrackAllowedDistance(Eigen::Vector2d crossTrackAllowedDistance);
+    void SetCrossTrackAllowedDistance(Eigen::VectorXd crossTrackAllowedDistance);
 
+    Eigen::Vector3d GetOnTrackError()
+    {
+        return errorTrack_;
+    }
+    Eigen::Vector3d GetCrossTrackError()
+    {
+        return errorCross_;
+    }
     const Eigen::Vector6d& getVirtualFrameToGoalError() const
     {
         return virtualFrameToGoalError_;
@@ -120,8 +128,8 @@ public:
 private:
     double sampleTime_;
     double virtualFrameGain_;
-    Eigen::Vector2d onTrackAllowedDistance_;
-    Eigen::Vector2d crossTrackAllowedDistance_;
+    Eigen::VectorXd onTrackAllowedDistance_;
+    Eigen::VectorXd crossTrackAllowedDistance_;
     Eigen::Vector6d toolToVirtualFrameError_;
     Eigen::Vector6d virtualFrameToGoalError_;
     Eigen::Vector6d normalizedVirtualFrameToGoalError_;
@@ -129,7 +137,8 @@ private:
     Eigen::TransfMatrix wTv_;
     VFType vftype_;
     Eigen::TransfMatrix wTg_;
-
+    Eigen::Vector3d errorTrack_;
+    Eigen::Vector3d errorCross_;
     bool useErrorNorm;
 };
 }
