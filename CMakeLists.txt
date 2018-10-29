@@ -20,12 +20,10 @@ option(BUILD_TESTS "Compile tests" OFF)
 add_library(ctrl_toolbox SHARED
     src/DigitalPID.cc
     src/VirtualFrame.cc
+    src/HelperFunctions.cc
 )
 
-target_link_libraries(ctrl_toolbox rml)
-
-#add_library(youBotModel include/test/youbot_armmodel.cc
-#)
+target_link_libraries(ctrl_toolbox rml Geographic)
 
 set_target_properties(ctrl_toolbox PROPERTIES LINKER_LANGUAGE CXX)
 
