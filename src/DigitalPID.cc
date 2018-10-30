@@ -39,7 +39,9 @@ void DigitalPID::Initialize(const PIDGains& gains, double sampleTime, double sat
     Ts_ = sampleTime;
     uMax_ = saturation;
     SetGains(gains);
+    SetErrorFunction(DifferenceFunctor<double>());
     PIDInitialized_ = true;
+    Reset();
 }
 
 void DigitalPID::SetGains(const PIDGains& g)
