@@ -16,11 +16,12 @@ VirtualFrame::VirtualFrame(VFType vft)
 
     virtualFrameGain_ = 0;
     sampleTime_ = 0;
+    onTrackAllowedDistance_.resize(2);
+    crossTrackAllowedDistance_.resize(2);
     onTrackAllowedDistance_(0) = 4.0;
     onTrackAllowedDistance_(1) = 4.5;
     crossTrackAllowedDistance_(0) = 1.0;
     crossTrackAllowedDistance_(1) = 1.5;
-
 }
 
 void VirtualFrame::SetSampleTime(double sampleTime)
@@ -38,14 +39,22 @@ void VirtualFrame::ResetState()
     toolToVirtualFrameError_.setZero();
 }
 
-void VirtualFrame::SetOnTrackAllowedDistance(Eigen::Vector2d onTrackAllowedDistance)
+void VirtualFrame::SetOnTrackAllowedDistance(Eigen::VectorXd onTrackAllowedDistance)
 {
-    onTrackAllowedDistance_ = onTrackAllowedDistance;
+    if (onTrackAllowedDistance.size() != 2) {
+        std::cerr << "[WARNING] On track allowed distance should be of size =2, using default values" << std::endl;
+    } else {
+        onTrackAllowedDistance_ = onTrackAllowedDistance;
+    }
 }
 
-void VirtualFrame::SetCrossTrackAllowedDistance(Eigen::Vector2d crossTrackAllowedDistance)
+void VirtualFrame::SetCrossTrackAllowedDistance(Eigen::VectorXd crossTrackAllowedDistance)
 {
-    crossTrackAllowedDistance_ = crossTrackAllowedDistance;
+    if (crossTrackAllowedDistance.size() != 2) {
+        std::cerr << "[WARNING] Cross track allowed distance should be of size = 2, using defalut value" << std::endl;
+    } else {
+        crossTrackAllowedDistance_ = crossTrackAllowedDistance;
+    }
 }
 
 void VirtualFrame::ResetState(const Eigen::TransfMatrix& wTv)
@@ -63,7 +72,6 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMa
     }
 
     virtualFrameToGoalError_ = rml::CartesianError(wTv_, wTg);
-
 
     if (useErrorNorm == true) {
         normalizedVirtualFrameToGoalError_ = virtualFrameToGoalError_;
@@ -95,16 +103,16 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::Vector6d
         if ((errorLinear + xdotbarLinear * sampleTime_).norm() > errorLinear.norm()) {
             outOfReach = true;
             Eigen::Vector3d n_vg = (wTg_.GetTransl() - wTv.GetTransl()).normalized();
-            Eigen::Vector3d error_track = (n_vg * n_vg.transpose()) * errorLinear;
-            Eigen::Vector3d error_cross = (Eigen::Matrix3d::Identity() - n_vg * n_vg.transpose()) * errorLinear;;
+            errorTrack_ = (n_vg * n_vg.transpose()) * errorLinear;
+            errorCross_ = (Eigen::Matrix3d::Identity() - n_vg * n_vg.transpose()) * errorLinear;
             double sigma;
-            double sigmaTrack = rml::DecreasingBellShapedFunction(onTrackAllowedDistance_(0), onTrackAllowedDistance_(1), 0, 1, error_track.norm());
-            double sigmaCross = rml::DecreasingBellShapedFunction(crossTrackAllowedDistance_(0), onTrackAllowedDistance_(1), 0, 1, error_cross.norm());
+            double sigmaTrack = rml::DecreasingBellShapedFunction(onTrackAllowedDistance_(0), onTrackAllowedDistance_(1), 0, 1, errorTrack_.norm());
+            double sigmaCross = rml::DecreasingBellShapedFunction(crossTrackAllowedDistance_(0), onTrackAllowedDistance_(1), 0, 1, errorCross_.norm());
             sigma = std::min(sigmaTrack, sigmaCross);
             virtualFrameVelocity_.SetSecondVect3(xdotbarLinear * sigma);
         }
     }
-   if (!outOfReach) {
+    if (!outOfReach) {
         virtualFrameVelocity_ = xdotbar;
     }
     // move the virtual frame
