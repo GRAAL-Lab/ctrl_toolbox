@@ -45,8 +45,11 @@ namespace ctb {
  */
 class DigitalPID {
 public:
+    DigitalPID();
     DigitalPID(const PIDGains& gains, double sampleTime, double saturation);
     virtual ~DigitalPID();
+
+    void Initialize(const PIDGains& gains, double sampleTime, double saturation);
 
     /**
 	 * @brief Sets the PID internal Gains.
@@ -96,8 +99,9 @@ private:
     double D_; //!< Derivative Term
     double I_; //!< Integral Term
     std::function<double(double, double)> ErrorFunction_; //!< Definition of the error function that is used in Compute()
-    bool initialized_; //!< Utility variable to check if the PID has been Reset()
-    bool TrToBeSetted_{ false };
+    bool PIDInitialized_;
+    bool hasBeenReset_; //!< Utility variable to check if the PID has been Reset()
+    bool TrToBeSetted_;
 };
 }
 

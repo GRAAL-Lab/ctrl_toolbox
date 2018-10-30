@@ -12,10 +12,16 @@
 
 namespace ctb {
 
+DigitalPID::DigitalPID()
+    : PIDInitialized_(false)
+{
+}
+
 DigitalPID::DigitalPID(const PIDGains& gains, double sampleTime, double saturation)
     : Ts_(sampleTime)
     , uMax_(saturation)
-    , initialized_(false)
+    , PIDInitialized_(true)
+    , hasBeenReset_(true)
     , TrToBeSetted_(false)
 {
 
@@ -24,8 +30,16 @@ DigitalPID::DigitalPID(const PIDGains& gains, double sampleTime, double saturati
     Reset();
 }
 
-DigitalPID::~DigitalPID(){
+DigitalPID::~DigitalPID()
+{
+}
 
+void DigitalPID::Initialize(const PIDGains& gains, double sampleTime, double saturation)
+{
+    Ts_ = sampleTime;
+    uMax_ = saturation;
+    SetGains(gains);
+    PIDInitialized_ = true;
 }
 
 void DigitalPID::SetGains(const PIDGains& g)
@@ -57,7 +71,8 @@ void DigitalPID::SetSaturation(double uMax)
 /**
  * @brief Resets the PID state.
  */
-void DigitalPID::Reset(){
+void DigitalPID::Reset()
+{
     int i;
     for (i = 0; i < 3; i++) {
         e_[i] = 0;
@@ -69,7 +84,7 @@ void DigitalPID::Reset(){
 
     D_ = 0;
     I_ = 0;
-    initialized_ = false;
+    hasBeenReset_ = true;
 }
 
 /**
@@ -79,63 +94,68 @@ void DigitalPID::Reset(){
  * @param fbk	Current feedback
  * @return	The PID controlled output
  */
-double DigitalPID::Compute(double ref, double fbk){
-    int i;
-    if (initialized_) {
-        for (i = 2; i > 0; i--) {
-            e_[i] = e_[i - 1];
-        }
-        u_[1] = u_[0];
-        y_[1] = y_[0];
-        y_[0] = fbk;
-    } else {
-        //ortos::DebugConsole::Write(ortos::LogLevel::info, "DigitalPID::Compute", "Initializing variables");
-        e_[0] = e_[1] = e_[2] = ErrorFunction_(ref, fbk);
-        u_[1] = u_[0] = 0;
-        y_[1] = y_[0] = fbk;
-        initialized_ = true;
-    }
-
-    double ydiff;
-    e_[0] = ErrorFunction_(ref, fbk);
-    ydiff = ErrorFunction_(y_[0], y_[1]);
-
-    if (Kd_ != 0.0 && Kp_ != 0.0) {
-        double Td = Kd_ / Kp_;
-        D_ = Td / (Td + N_ * Ts_) * D_ - Kp_ * Td * N_ / (Td + N_ * Ts_) * (ydiff);
-    }
-
-    double v = Kp_ * e_[0] + I_ + D_ + Kff_ * ref;
-    if (std::abs(v) > uMax_) {
-        u_[0] = v / std::abs(v) * uMax_;
-    } else {
-        u_[0] = v;
-    }
-
-    //ortos::DebugConsole::Write(ortos::LogLevel::info, "DigitalPID::Compute",
-    //		"e = %+lf I = %+lf D = %+lf uff = %+lf v = %+lf u = %+lf ydiff = %+lf", e[0], I_, D_, Kff_ * ref, v, u[0], ydiff);
-    if (Ki_ != 0.0) {
-        if (Tr_ == 0.0) {
-            std::cerr << "\r Set Tr different from zero to add integral part " << std::flush;
-            TrToBeSetted_ = true;
-            I_ = 0;
+double DigitalPID::Compute(double ref, double fbk)
+{
+    if (PIDInitialized_) {
+        int i;
+        if (hasBeenReset_) {
+            //ortos::DebugConsole::Write(ortos::LogLevel::info, "DigitalPID::Compute", "Initializing variables");
+            e_[0] = e_[1] = e_[2] = ErrorFunction_(ref, fbk);
+            u_[1] = u_[0] = 0;
+            y_[1] = y_[0] = fbk;
+            hasBeenReset_ = false;
         } else {
-            if (TrToBeSetted_) {
-                std::cerr << "\r Added Integral Part                                    " << std::flush;
-                TrToBeSetted_ = false;
+            for (i = 2; i > 0; i--) {
+                e_[i] = e_[i - 1];
             }
-            I_ = I_ + (Ki_ * Ts_) * e_[0] + (Ts_ / Tr_) * (u_[0] - v);
+            u_[1] = u_[0];
+            y_[1] = y_[0];
+            y_[0] = fbk;
         }
-    } else {
-        I_ = 0;
-    }
 
-    return u_[0];
+        double ydiff;
+        e_[0] = ErrorFunction_(ref, fbk);
+        ydiff = ErrorFunction_(y_[0], y_[1]);
+
+        if (Kd_ != 0.0 && Kp_ != 0.0) {
+            double Td = Kd_ / Kp_;
+            D_ = Td / (Td + N_ * Ts_) * D_ - Kp_ * Td * N_ / (Td + N_ * Ts_) * (ydiff);
+        }
+
+        double v = Kp_ * e_[0] + I_ + D_ + Kff_ * ref;
+        if (std::abs(v) > uMax_) {
+            u_[0] = v / std::abs(v) * uMax_;
+        } else {
+            u_[0] = v;
+        }
+
+        //ortos::DebugConsole::Write(ortos::LogLevel::info, "DigitalPID::Compute",
+        //		"e = %+lf I = %+lf D = %+lf uff = %+lf v = %+lf u = %+lf ydiff = %+lf", e[0], I_, D_, Kff_ * ref, v, u[0], ydiff);
+        if (Ki_ != 0.0) {
+            if (Tr_ == 0.0) {
+                std::cerr << "\r Set Tr different from zero to add integral part " << std::flush;
+                TrToBeSetted_ = true;
+                I_ = 0;
+            } else {
+                if (TrToBeSetted_) {
+                    std::cerr << "\r Added Integral Part                                    " << std::flush;
+                    TrToBeSetted_ = false;
+                }
+                I_ = I_ + (Ki_ * Ts_) * e_[0] + (Ts_ / Tr_) * (u_[0] - v);
+            }
+        } else {
+            I_ = 0;
+        }
+
+        return u_[0];
+    } else {
+        std::cerr << "PID Was not initialized! Returning = 0.0" << std::endl;
+        return 0.0;
+    }
 }
 
 void DigitalPID::SetErrorFunction(const std::function<double(double, double)>& errorFunction)
 {
     ErrorFunction_ = errorFunction;
 }
-
 }
