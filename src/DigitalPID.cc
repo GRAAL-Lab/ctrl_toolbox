@@ -44,27 +44,21 @@ void DigitalPID::Initialize(const PIDGains& gains, double sampleTime, double sat
     Reset();
 }
 
-void DigitalPID::SetGains(const PIDGains& g)
+PIDGains DigitalPID::GetGains() const
 {
-    Kp_ = g.Kp;
-    Ki_ = g.Ki;
-    Kd_ = g.Kd;
-    Kff_ = g.Kff;
-    N_ = g.N;
-    Tr_ = g.Tr;
+    return g_;
 }
 
-/**
- * @brief Sets the control sampling time.
- */
+void DigitalPID::SetGains(const PIDGains &gains)
+{
+    g_ = gains;
+}
+
 void DigitalPID::SetSampleTime(double Ts)
 {
     Ts_ = Ts;
 }
 
-/**
- * @brief Sets the output saturation value.
- */
 void DigitalPID::SetSaturation(double uMax)
 {
     uMax_ = uMax;
@@ -119,12 +113,12 @@ double DigitalPID::Compute(double ref, double fbk)
         e_[0] = ErrorFunction_(ref, fbk);
         ydiff = ErrorFunction_(y_[0], y_[1]);
 
-        if (Kd_ != 0.0 && Kp_ != 0.0) {
-            double Td = Kd_ / Kp_;
-            D_ = Td / (Td + N_ * Ts_) * D_ - Kp_ * Td * N_ / (Td + N_ * Ts_) * (ydiff);
+        if (g_.Kd != 0.0 && g_.Kp != 0.0) {
+            double Td = g_.Kd / g_.Kp;
+            D_ = Td / (Td + g_.N * Ts_) * D_ - g_.Kp * Td * g_.N / (Td + g_.N * Ts_) * (ydiff);
         }
 
-        double v = Kp_ * e_[0] + I_ + D_ + Kff_ * ref;
+        double v = g_.Kp * e_[0] + I_ + D_ + g_.Kff * ref;
         if (std::abs(v) > uMax_) {
             u_[0] = v / std::abs(v) * uMax_;
         } else {
@@ -133,8 +127,8 @@ double DigitalPID::Compute(double ref, double fbk)
 
         //ortos::DebugConsole::Write(ortos::LogLevel::info, "DigitalPID::Compute",
         //		"e = %+lf I = %+lf D = %+lf uff = %+lf v = %+lf u = %+lf ydiff = %+lf", e[0], I_, D_, Kff_ * ref, v, u[0], ydiff);
-        if (Ki_ != 0.0) {
-            if (Tr_ == 0.0) {
+        if (g_.Ki != 0.0) {
+            if (g_.Tr == 0.0) {
                 std::cerr << "\r Set Tr different from zero to add integral part " << std::flush;
                 TrToBeSetted_ = true;
                 I_ = 0;
@@ -143,7 +137,7 @@ double DigitalPID::Compute(double ref, double fbk)
                     std::cerr << "\r Added Integral Part                                    " << std::flush;
                     TrToBeSetted_ = false;
                 }
-                I_ = I_ + (Ki_ * Ts_) * e_[0] + (Ts_ / Tr_) * (u_[0] - v);
+                I_ = I_ + (g_.Ki * Ts_) * e_[0] + (Ts_ / g_.Tr) * (u_[0] - v);
             }
         } else {
             I_ = 0;
@@ -160,4 +154,5 @@ void DigitalPID::SetErrorFunction(const std::function<double(double, double)>& e
 {
     ErrorFunction_ = errorFunction;
 }
+
 }

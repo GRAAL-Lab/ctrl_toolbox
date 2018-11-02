@@ -52,13 +52,6 @@ public:
     void Initialize(const PIDGains& gains, double sampleTime, double saturation);
 
     /**
-	 * @brief Sets the PID internal Gains.
-	 *
-	 * @param[in] g The
-	 */
-    void SetGains(const PIDGains& g);
-
-    /**
 	 * @brief Sets the control sampling time.
 	 */
     void SetSampleTime(double Ts);
@@ -84,13 +77,17 @@ public:
 
     void SetErrorFunction(const std::function<double(double, double)>& errorFunction);
 
+    PIDGains GetGains() const;
+    void SetGains(const PIDGains &gains);
+
 private:
-    double Kp_; //!< Proportional gain
-    double Ki_; //!< Integral gain
-    double Kd_; //!< Derivative gain
-    double Kff_; //!< Feed-forward gain
-    double N_; //!< Maximum gain for derivative part
-    double Tr_; //!< Tracking time constant for anti-windup
+    PIDGains g_;
+    //double Kp_; //!< Proportional gain
+    //double Ki_; //!< Integral gain
+    //double Kd_; //!< Derivative gain
+    //double Kff_; //!< Feed-forward gain
+    //double N_; //!< Maximum gain for derivative part
+    //double Tr_; //!< Tracking time constant for anti-windup
     double Ts_; //!< Sample Time
     double uMax_; //!< Output saturation value
     double u_[2]; //!< PID Output
