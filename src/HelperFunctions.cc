@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "ctrl_toolbox/HelperFunctions.h"
 
 namespace ctb {
@@ -28,12 +30,21 @@ double HeadingErrorRad(double from, double to)
     return diffHeading;
 }
 
-void DistanceAndAzimuthRad(LatLong from, LatLong to, double &distance, double &azimuthrad)
+void DistanceAndAzimuthRad(const LatLong& from, const LatLong& to, double& distance, double& azimuthrad)
 {
-    GeographicLib::Geodesic geod(GeographicLib::Constants::WGS84_a(), GeographicLib::Constants::WGS84_f());
-    geod.Inverse(from.latitude, from.longitude, to.latitude, to.longitude, distance, azimuthrad);
+    // From some really weird reason not understable from the GeographicLib documentation, if the "finalHeading"
+    // result variable is not passed to the "Inverse()" function, the result is almost always zero.
+    double azimuthdeg(0.0), finalHeading(0.0);
+    auto geod = GeographicLib::Geodesic::WGS84();
+    geod.Inverse(from.latitude, from.longitude, to.latitude, to.longitude, distance, azimuthdeg, finalHeading);
 
-    azimuthrad = azimuthrad * M_PI / 180.0;
+    while (azimuthdeg < 0.0)
+        azimuthdeg += 360.0;
+
+    azimuthrad = azimuthdeg * M_PI / 180.0;
+
+    /*std::cout << "From (lat,long): " << from.latitude << ", " << from.longitude << std::endl;
+    std::cout << "To   (lat,long): " << to.latitude << ", " << to.longitude << std::endl;
+    std::cout << "Distance, Azimuth: " << distance << ", " << azimuthrad << std::endl;*/
 }
-
 }

@@ -8,7 +8,7 @@
 namespace ctb {
 
 double HeadingErrorRad(double from, double to);
-void DistanceAndAzimuthRad(LatLong from, LatLong to, double &distance, double &azimuthrad);
+void DistanceAndAzimuthRad(const LatLong &from, const LatLong &to, double &distance, double &azimuthrad);
 
 /**
  * @brief Difference functor

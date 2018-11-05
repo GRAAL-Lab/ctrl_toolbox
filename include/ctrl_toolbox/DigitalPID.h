@@ -82,12 +82,6 @@ public:
 
 private:
     PIDGains g_;
-    //double Kp_; //!< Proportional gain
-    //double Ki_; //!< Integral gain
-    //double Kd_; //!< Derivative gain
-    //double Kff_; //!< Feed-forward gain
-    //double N_; //!< Maximum gain for derivative part
-    //double Tr_; //!< Tracking time constant for anti-windup
     double Ts_; //!< Sample Time
     double uMax_; //!< Output saturation value
     double u_[2]; //!< PID Output
