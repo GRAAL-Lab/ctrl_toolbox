@@ -4,6 +4,11 @@
 
 namespace ctb {
 
+double clamp(double n, double lower, double upper)
+{
+    return std::max(lower, std::min(n, upper));
+}
+
 double HeadingErrorRad(double from, double to)
 {
     double oppositeHeading;
@@ -42,9 +47,5 @@ void DistanceAndAzimuthRad(const LatLong& from, const LatLong& to, double& dista
         azimuthdeg += 360.0;
 
     azimuthrad = azimuthdeg * M_PI / 180.0;
-
-    /*std::cout << "From (lat,long): " << from.latitude << ", " << from.longitude << std::endl;
-    std::cout << "To   (lat,long): " << to.latitude << ", " << to.longitude << std::endl;
-    std::cout << "Distance, Azimuth: " << distance << ", " << azimuthrad << std::endl;*/
 }
 }

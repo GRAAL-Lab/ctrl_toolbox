@@ -10,9 +10,9 @@
 
 #include "ctrl_toolbox/DataStructs.h"
 #include "ctrl_toolbox/HelperFunctions.h"
+#include <cmath>
 #include <cstdint>
 #include <functional>
-#include <cmath>
 #include <iostream>
 
 namespace ctb {
@@ -73,15 +73,22 @@ public:
 	 * @param fbk	Current feedback
 	 * @return	The PID controlled output
 	 */
-    double Compute(double ref, double fbk);
+    double Compute(double GetRef, double GetFbk);
 
     void SetErrorFunction(const std::function<double(double, double)>& errorFunction);
 
     PIDGains GetGains() const;
-    void SetGains(const PIDGains &gains);
+    void SetGains(const PIDGains& gains);
+
+    double GetRef() const;
+
+    double GetFbk() const;
+
+    double GetOutput() const;
 
 private:
     PIDGains g_;
+    double ref_;
     double Ts_; //!< Sample Time
     double uMax_; //!< Output saturation value
     double u_[2]; //!< PID Output

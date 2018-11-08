@@ -54,6 +54,21 @@ void DigitalPID::SetGains(const PIDGains &gains)
     g_ = gains;
 }
 
+double DigitalPID::GetRef() const
+{
+    return ref_;
+}
+
+double DigitalPID::GetFbk() const
+{
+    return y_[0];
+}
+
+double DigitalPID::GetOutput() const
+{
+    return u_[0];
+}
+
 void DigitalPID::SetSampleTime(double Ts)
 {
     Ts_ = Ts;
@@ -92,6 +107,8 @@ void DigitalPID::Reset()
  */
 double DigitalPID::Compute(double ref, double fbk)
 {
+    ref_ = ref;
+
     if (PIDInitialized_) {
         int i;
         if (hasBeenReset_) {
@@ -142,7 +159,6 @@ double DigitalPID::Compute(double ref, double fbk)
         } else {
             I_ = 0;
         }
-
         return u_[0];
     } else {
         std::cerr << "PID Was not initialized! Returning = 0.0" << std::endl;

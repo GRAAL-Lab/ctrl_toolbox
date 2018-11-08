@@ -7,7 +7,26 @@
 
 namespace ctb {
 
+/**
+ * @brief Helper clip function (available in std:: from c++17)
+ */
+double clamp(double n, double lower, double upper);
+
+/**
+ * @brief HeadingErrorRad
+ * @param from
+ * @param to
+ * @return
+ */
 double HeadingErrorRad(double from, double to);
+
+/**
+ * @brief DistanceAndAzimuthRad
+ * @param from
+ * @param to
+ * @param distance
+ * @param azimuthrad
+ */
 void DistanceAndAzimuthRad(const LatLong &from, const LatLong &to, double &distance, double &azimuthrad);
 
 /**
