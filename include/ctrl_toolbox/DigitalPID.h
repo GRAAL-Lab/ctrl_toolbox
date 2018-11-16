@@ -46,7 +46,9 @@ namespace ctb {
 class DigitalPID {
 public:
     DigitalPID();
+
     DigitalPID(const PIDGains& gains, double sampleTime, double saturation);
+
     virtual ~DigitalPID();
 
     void Initialize(const PIDGains& gains, double sampleTime, double saturation);
@@ -91,9 +93,9 @@ private:
     double ref_;
     double Ts_; //!< Sample Time
     double uMax_; //!< Output saturation value
-    double u_[2]; //!< PID Output
-    double e_[3]; //!< Error
-    double y_[2]; //!< Feedback
+    std::vector<double> u_; //!< PID Output
+    std::vector<double> e_; //!< Error
+    std::vector<double> y_; //!< Feedback
     double D_; //!< Derivative Term
     double I_; //!< Integral Term
     std::function<double(double, double)> ErrorFunction_; //!< Definition of the error function that is used in Compute()
