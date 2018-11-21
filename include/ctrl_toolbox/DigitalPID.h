@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <vector>
 
 namespace ctb {
 
