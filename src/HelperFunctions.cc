@@ -9,8 +9,9 @@ double clamp(double n, double lower, double upper)
     return std::max(lower, std::min(n, upper));
 }
 
-double HeadingErrorRad(double from, double to)
+double HeadingErrorRad(double to, double from)
 {
+    //std::cout << " HeadingErrorRad(double from, double to)" << std::endl;
     double oppositeHeading;
     double diffHeading;
 
