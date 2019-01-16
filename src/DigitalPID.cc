@@ -7,14 +7,19 @@
 
 #include <cmath>
 
-#include "DigitalPID.h"
+#include "ctrl_toolbox/DigitalPID.h"
 #include <iostream>
 
 namespace ctb {
 
 DigitalPID::DigitalPID()
     : PIDInitialized_(false)
+    , hasBeenReset_(true)
+    , TrToBeSetted_(false)
 {
+    u_.resize(2, 0.0);
+    e_.resize(3, 0.0);
+    y_.resize(2, 0.0);
 }
 
 DigitalPID::DigitalPID(const PIDGains& gains, double sampleTime, double saturation)
@@ -25,6 +30,9 @@ DigitalPID::DigitalPID(const PIDGains& gains, double sampleTime, double saturati
     , TrToBeSetted_(false)
 {
 
+    u_.resize(2, 0.0);
+    e_.resize(3, 0.0);
+    y_.resize(2, 0.0);
     SetGains(gains);
     SetErrorFunction(DifferenceFunctor<double>());
     Reset();
@@ -49,7 +57,7 @@ PIDGains DigitalPID::GetGains() const
     return g_;
 }
 
-void DigitalPID::SetGains(const PIDGains &gains)
+void DigitalPID::SetGains(const PIDGains& gains)
 {
     g_ = gains;
 }
@@ -170,5 +178,4 @@ void DigitalPID::SetErrorFunction(const std::function<double(double, double)>& e
 {
     ErrorFunction_ = errorFunction;
 }
-
 }
