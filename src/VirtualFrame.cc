@@ -107,7 +107,7 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::Vector6d
             errorCross_ = (Eigen::Matrix3d::Identity() - n_vg * n_vg.transpose()) * errorLinear;
             double sigma;
             double sigmaTrack = rml::DecreasingBellShapedFunction(onTrackAllowedDistance_(0), onTrackAllowedDistance_(1), 0, 1, errorTrack_.norm());
-            double sigmaCross = rml::DecreasingBellShapedFunction(crossTrackAllowedDistance_(0), onTrackAllowedDistance_(1), 0, 1, errorCross_.norm());
+            double sigmaCross = rml::DecreasingBellShapedFunction(crossTrackAllowedDistance_(0), crossTrackAllowedDistance_(1), 0, 1, errorCross_.norm());
             sigma = std::min(sigmaTrack, sigmaCross);
             virtualFrameVelocity_.SetSecondVect3(xdotbarLinear * sigma);
         }
