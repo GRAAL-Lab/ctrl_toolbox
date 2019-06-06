@@ -37,6 +37,9 @@ struct ADPGains {
     Eigen::Vector3d up_m = {};
     Eigen::Vector3d low_m = {};
     std::vector<bool> en_integration = {};
+    
+    Eigen::Vector6d up_control = {};
+    Eigen::Vector6d low_control = {};
 
 
     //double Kff = { 0.0 }; //!< Feed-forward gain
