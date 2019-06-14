@@ -21,6 +21,9 @@ add_library(ctrl_toolbox SHARED
     src/DigitalPID.cc
     src/VirtualFrame.cc
     src/HelperFunctions.cc
+    src/ModelKalmanFilter.cc
+    src/ExtendedKalmanFilter.cc
+    src/MeasurmentKalmanFilter.cc
 )
 
 target_link_libraries(ctrl_toolbox rml Geographic)
