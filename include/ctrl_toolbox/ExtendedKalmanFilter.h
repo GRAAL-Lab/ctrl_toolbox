@@ -12,7 +12,7 @@
 namespace ctb {
 
 class ExtendedKalmanFilter {
-
+public:
     // F, note that f must depend on the state and the input and the dimension of the state, the indexAngles indicates
     // which
     // entries of the state are angles to be wrapped;
@@ -22,7 +22,7 @@ class ExtendedKalmanFilter {
     // Method that postpone to H the matrix output of the function, note that h is function of the stateitself
     void AddMeasurment(std::shared_ptr<MeasurmentKalmanFilter> h);
 
-    void Predict(double now, Eigen::VectorXd u);
+    void Predict(Eigen::VectorXd u);
 
     void ApplyMeasurements();
 
@@ -36,12 +36,12 @@ private:
     double FilterAngularJump(const double& primaryHeading, const double& otherHeading);
     void NormalizeAngle(double& angle);
 
-    Eigen::MatrixXd W_; //input matrix
     Eigen::MatrixXd F_; //state matrix
-    Eigen::MatrixXd G_; //measurment matrix
+    Eigen::MatrixXd G_; // measurment matrix
     Eigen::MatrixXd K_; // kalman gain
     Eigen::VectorXd x_; // state
     Eigen::VectorXd y_; // measurements
+    Eigen::VectorXd ypredict_; //predictedMeasure
 
     Eigen::MatrixXd S_; // measure estimate covariance
     Eigen::MatrixXd Sigma_; // state estimate covariance
@@ -49,7 +49,7 @@ private:
     Eigen::MatrixXd R_; // measurement covariance (error in the modelling of G)
 
 
-    double lastEstimateTime_;
+    std::chrono::time_point<std::chrono::milliseconds> lastEstimateTime_;
     double speed_;
     int stateDimension_;
     std::shared_ptr<ModelKalmanFilter> kalmanFilterModel_;

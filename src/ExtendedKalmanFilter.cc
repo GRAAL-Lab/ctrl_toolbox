@@ -24,31 +24,31 @@ void ExtendedKalmanFilter::AddMeasurment(std::shared_ptr<MeasurmentKalmanFilter>
     if (isFirst_) {
         G_ = h->ComputeG(x_, u_);
         y_ = h->GetMeasure();
+        ypredict_= h->GetPredictedMeasure(x_);
         R_ = h->GetCovarianceMesure();
         isFirst_ = false;
     } else {
         G_ = rml::UnderJuxtapose(G_, h->ComputeG(x_, u_));
         y_ = rml::UnderJuxtapose(y_, h->GetMeasure());
+        ypredict_ = rml::UnderJuxtapose(ypredict_, h->GetPredictedMeasure(x_));
         R_ = rml::UnderJuxtapose(R_, h->GetCovarianceMesure());
     }
 }
 
-void ExtendedKalmanFilter::Predict(double now, Eigen::VectorXd u)
+void ExtendedKalmanFilter::Predict(Eigen::VectorXd u)
 {
 
     u_ = u;
     F_ = kalmanFilterModel_->ComputeF(x_, u_);
-    W_ = kalmanFilterModel_->ComputeW(x_, u_);
     Q_ = kalmanFilterModel_->GetCovariance();
 
     for (const auto i : indexAngles_) {
 
         NormalizeAngle(x_(i));
     }
-
     // compute x(k|k-1)
-    x_ = F_ * x_ + W_ * u_;
-
+    //x_ = F_ * x_ + W_ * u_; // compute via model
+     x_ = kalmanFilterModel_->ComputeState(x_,u_);
     // compute Sigma(k|k-1)
     Sigma_ = F_ * Sigma_ * F_.transpose() + Q_;
 }
@@ -56,19 +56,21 @@ void ExtendedKalmanFilter::Predict(double now, Eigen::VectorXd u)
 void ExtendedKalmanFilter::ApplyMeasurements()
 {
 
-    // update of the covariance of the measures
-    S_ = G_ * Sigma_ * G_.transpose() + R_;
+    if (!isFirst_) {
+        // update of the covariance of the measures
+        S_ = G_ * Sigma_ * G_.transpose() + R_;
 
-    // update of the kalman filter gain
-    K_ = Sigma_ * G_.transpose() * rml::RegularizedPseudoInverse(S_, regularizationParameter_);
+        // update of the kalman filter gain
+        K_ = Sigma_ * G_.transpose() * rml::RegularizedPseudoInverse(S_, regularizationParameter_);
 
-    // compute x(k|k) = x(k|k-1)+K(k)*[y(k)-y(k|k-1)]
-    x_ = x_ + K_ * (y_ - G_ * x_);
+        // compute x(k|k) = x(k|k-1)+K(k)*[y(k)-y(k|k-1)]
+        x_ = x_ + K_ * (y_ - ypredict_);
 
-    // compute Sigma(k|k)
-    Sigma_ = Sigma_ - K_ * S_ * K_.transpose();
+        // compute Sigma(k|k)
+        Sigma_ = Sigma_ - K_ * S_ * K_.transpose();
 
-    isFirst_ = false;
+        isFirst_ = true;
+    }
 }
 
 void ExtendedKalmanFilter::Reset() {}

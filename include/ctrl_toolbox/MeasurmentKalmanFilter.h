@@ -10,11 +10,14 @@ public:
     virtual ~MeasurmentKalmanFilter();
     virtual Eigen::MatrixXd ComputeG(const Eigen::VectorXd state, const Eigen::VectorXd input) = 0;
     Eigen::VectorXd GetMeasure();
+    virtual Eigen::VectorXd GetPredictedMeasure(const Eigen::VectorXd state) = 0 ;
     void SetMeasure(const Eigen::VectorXd measure);
-    virtual Eigen::MatrixXd GetCovarianceMesure() = 0;
+    void SetCovariance(const Eigen::MatrixXd);
+    Eigen::MatrixXd GetCovarianceMesure() ;
 
 private:
     Eigen::VectorXd measure_;
+    Eigen::MatrixXd covariance_;
 };
 }
 #endif // MEASURMENTKALMANFILTER_H
