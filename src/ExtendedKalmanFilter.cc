@@ -16,6 +16,7 @@ ExtendedKalmanFilter::ExtendedKalmanFilter(
     Sigma_.setZero(stateDimension_, stateDimension_);
     regularizationParameter_.params.lambda = 0.000001;
     regularizationParameter_.params.threshold = 0.000001;
+    isFirst_ = true;
 }
 
 // Method that postpone to H the matrix output of the function, note that h is function of the stateitself
@@ -28,10 +29,18 @@ void ExtendedKalmanFilter::AddMeasurment(std::shared_ptr<MeasurmentKalmanFilter>
         R_ = h->GetCovarianceMesure();
         isFirst_ = false;
     } else {
+
+        int size_new_measure = h->GetMeasure().size();
+        Eigen::MatrixXd zero_previous_covariance;
+        zero_previous_covariance.setZero(size_new_measure,y_.size());
+        Eigen::MatrixXd zero_new_covariance;
+        zero_new_covariance.setZero(y_.size(),size_new_measure);
         G_ = rml::UnderJuxtapose(G_, h->ComputeG(x_, u_));
         y_ = rml::UnderJuxtapose(y_, h->GetMeasure());
         ypredict_ = rml::UnderJuxtapose(ypredict_, h->GetPredictedMeasure(x_));
-        R_ = rml::UnderJuxtapose(R_, h->GetCovarianceMesure());
+        R_ = rml::UnderJuxtapose(R_, zero_previous_covariance);
+        Eigen::MatrixXd R_temp = rml::UnderJuxtapose(zero_new_covariance,h->GetCovarianceMesure());
+        R_ = rml::RightJuxtapose(R_,R_temp);
     }
 }
 
@@ -56,7 +65,9 @@ void ExtendedKalmanFilter::Predict(Eigen::VectorXd u)
 void ExtendedKalmanFilter::ApplyMeasurements()
 {
 
+
     if (!isFirst_) {
+
         // update of the covariance of the measures
         S_ = G_ * Sigma_ * G_.transpose() + R_;
 
@@ -70,6 +81,8 @@ void ExtendedKalmanFilter::ApplyMeasurements()
         Sigma_ = Sigma_ - K_ * S_ * K_.transpose();
 
         isFirst_ = true;
+
+
     }
 }
 
