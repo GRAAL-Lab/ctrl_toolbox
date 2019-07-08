@@ -36,7 +36,7 @@ struct ADPGains {
     Eigen::Vector3d low_f = {};
     Eigen::Vector3d up_m = {};
     Eigen::Vector3d low_m = {};
-    std::vector<bool> en_integration = {};
+    Eigen::Vector9d en_integration = {};
     
     Eigen::Vector6d up_control = {};
     Eigen::Vector6d low_control = {};
