@@ -25,22 +25,31 @@ void ExtendedKalmanFilter::AddMeasurment(std::shared_ptr<MeasurmentKalmanFilter>
     if (isFirst_) {
         G_ = h->ComputeG(x_, u_);
         y_ = h->GetMeasure();
-        ypredict_= h->GetPredictedMeasure(x_);
+        ypredict_ = h->GetPredictedMeasure(x_);
+
+        if (h->IsAngleMeasure()) {
+            ypredict_  =FilterAngularJump(y_, ypredict_);
+        }
         R_ = h->GetCovarianceMesure();
         isFirst_ = false;
     } else {
 
         int size_new_measure = h->GetMeasure().size();
         Eigen::MatrixXd zero_previous_covariance;
-        zero_previous_covariance.setZero(size_new_measure,y_.size());
+        zero_previous_covariance.setZero(size_new_measure, y_.size());
         Eigen::MatrixXd zero_new_covariance;
-        zero_new_covariance.setZero(y_.size(),size_new_measure);
+        zero_new_covariance.setZero(y_.size(), size_new_measure);
         G_ = rml::UnderJuxtapose(G_, h->ComputeG(x_, u_));
-        y_ = rml::UnderJuxtapose(y_, h->GetMeasure());
-        ypredict_ = rml::UnderJuxtapose(ypredict_, h->GetPredictedMeasure(x_));
+        Eigen::VectorXd yTemp = h->GetMeasure();
+        Eigen::VectorXd ypredictTemp = h->GetPredictedMeasure(x_);
+        if(h->IsAngleMeasure()){
+            ypredictTemp = FilterAngularJump(yTemp, ypredictTemp);
+        }
+        y_ = rml::UnderJuxtapose(y_, yTemp);
+        ypredict_ = rml::UnderJuxtapose(ypredict_, ypredictTemp);
         R_ = rml::UnderJuxtapose(R_, zero_previous_covariance);
-        Eigen::MatrixXd R_temp = rml::UnderJuxtapose(zero_new_covariance,h->GetCovarianceMesure());
-        R_ = rml::RightJuxtapose(R_,R_temp);
+        Eigen::MatrixXd R_temp = rml::UnderJuxtapose(zero_new_covariance, h->GetCovarianceMesure());
+        R_ = rml::RightJuxtapose(R_, R_temp);
     }
 }
 
@@ -51,20 +60,21 @@ void ExtendedKalmanFilter::Predict(Eigen::VectorXd u)
     F_ = kalmanFilterModel_->ComputeF(x_, u_);
     Q_ = kalmanFilterModel_->GetCovariance();
 
+    // compute x(k|k-1)
+    // x_ = F_ * x_ + W_ * u_; // compute via model
+    x_ = kalmanFilterModel_->ComputeState(x_, u_);
+
     for (const auto i : indexAngles_) {
 
         NormalizeAngle(x_(i));
     }
-    // compute x(k|k-1)
-    //x_ = F_ * x_ + W_ * u_; // compute via model
-     x_ = kalmanFilterModel_->ComputeState(x_,u_);
+
     // compute Sigma(k|k-1)
     Sigma_ = F_ * Sigma_ * F_.transpose() + Q_;
 }
 
 void ExtendedKalmanFilter::ApplyMeasurements()
 {
-
 
     if (!isFirst_) {
 
@@ -81,14 +91,12 @@ void ExtendedKalmanFilter::ApplyMeasurements()
         Sigma_ = Sigma_ - K_ * S_ * K_.transpose();
 
         isFirst_ = true;
-
-
     }
 }
 
 void ExtendedKalmanFilter::Reset() {}
 
-void ExtendedKalmanFilter::Init() {}
+void ExtendedKalmanFilter::Init(const Eigen::VectorXd initialState) { x_ = initialState; }
 
 Eigen::VectorXd ExtendedKalmanFilter::GetState() { return x_; }
 
@@ -104,5 +112,27 @@ void ExtendedKalmanFilter::NormalizeAngle(double& angle)
     while (angle < -M_PI) {
         angle += 2 * M_PI;
     }
+}
+
+Eigen::VectorXd ExtendedKalmanFilter::FilterAngularJump(const Eigen::VectorXd primaryHeading, const Eigen::VectorXd otherHeading)
+{
+
+    Eigen::VectorXd out;
+    out.resize(primaryHeading.size());
+    for (int i = 0; i < primaryHeading.size(); i++) {
+        double diff = primaryHeading(i) - otherHeading(i);
+
+        out(i) = otherHeading(i);
+
+        if (diff > M_PI)
+            out(i) += 2.0 * M_PI;
+        else {
+            if (diff < -M_PI) {
+                out(i) -= 2.0 * M_PI;
+            }
+        }
+    }
+
+    return out;
 }
 }

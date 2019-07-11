@@ -6,7 +6,7 @@
 namespace ctb {
 class MeasurmentKalmanFilter {
 public:
-    MeasurmentKalmanFilter();
+    MeasurmentKalmanFilter(bool isAngleMeasure);
     virtual ~MeasurmentKalmanFilter();
     virtual Eigen::MatrixXd ComputeG(const Eigen::VectorXd state, const Eigen::VectorXd input) = 0;
     Eigen::VectorXd GetMeasure();
@@ -14,10 +14,12 @@ public:
     void SetMeasure(const Eigen::VectorXd measure);
     void SetCovariance(const Eigen::MatrixXd);
     Eigen::MatrixXd GetCovarianceMesure() ;
+    bool IsAngleMeasure();
 
 private:
     Eigen::VectorXd measure_;
     Eigen::MatrixXd covariance_;
+    bool isAngleMeasure_;
 };
 }
 #endif // MEASURMENTKALMANFILTER_H

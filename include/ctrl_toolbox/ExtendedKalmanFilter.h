@@ -28,13 +28,15 @@ public:
 
     void Reset();
 
-    void Init();
+    void Init(const Eigen::VectorXd initialState);
 
     Eigen::VectorXd GetState();
 
+
 private:
-    double FilterAngularJump(const double& primaryHeading, const double& otherHeading);
+
     void NormalizeAngle(double& angle);
+    Eigen::VectorXd FilterAngularJump(const Eigen::VectorXd primaryHeading, const Eigen::VectorXd otherHeading);
 
     Eigen::MatrixXd F_; //state matrix
     Eigen::MatrixXd G_; // measurment matrix
