@@ -10,3 +10,4 @@ The list of components is the following:
 ## Dependencies
 
 * RML: Robotic Mathematical Library (https://bitbucket.org/isme_robotics/rml/src)
+* Geographic Library (for Ubuntu install libgeographic-dev package)
