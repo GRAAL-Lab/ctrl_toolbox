@@ -15,9 +15,12 @@ namespace ctb {
 /**
  * @brief A simple virtual frame for smooth control
  *
- * The virtual frame is a simple concept: instead of feeding a new goal position <g> directly to the tool frame <t> of the robot
- * a virtual frame is used to avoid discontinuities. The virtual frame is set initially coincident with the tool frame <t>, then
- * an integration process brings the virtual frame towards the goal frame. This virtual frame is then fed as "goal" to the tool frame
+ * The virtual frame is a simple concept: instead of feeding a new goal position <g> directly to the tool frame <t> of
+ * the robot
+ * a virtual frame is used to avoid discontinuities. The virtual frame is set initially coincident with the tool frame
+ * <t>, then
+ * an integration process brings the virtual frame towards the goal frame. This virtual frame is then fed as "goal" to
+ * the tool frame
  * which does not see any jumps in the goal position because they are filtered by the virtual frame.
  *
  * A mechanism is implemented to avoid that the virtual frame "runs away" too much from the tool frame.
@@ -25,70 +28,84 @@ namespace ctb {
 class VirtualFrame {
 
 public:
-    enum VFType { FullPose,
+    enum VFType {
+        FullPose,
         Angular,
-        Linear };
+        Linear
+    };
+
+    enum VFTypeProjector {
+        Default,
+        OnPlane,
+    };
     /**
-	 * @brief Default constructor
-	 */
-    VirtualFrame(VFType vft = FullPose);
+         * @brief Default constructor
+         */
+    VirtualFrame(VFType vft = FullPose, VFTypeProjector vfprojector = Default);
 
     /**
-	 * @brief Set the integration sample time
-	 * Sets the integration sample time which is used by the Compute calls. This time should be the interval between two
-	 * consecutive calls to the Compute method, i.e. typically the sample time of the task itself, assuming the virtual frame
-	 * updated every run
-	 * @param[in] sampleTime integration sample time [s]
-	 */
+         * @brief Set the integration sample time
+         * Sets the integration sample time which is used by the Compute calls. This time should be the interval between
+     * two
+         * consecutive calls to the Compute method, i.e. typically the sample time of the task itself, assuming the
+     * virtual frame
+         * updated every run
+         * @param[in] sampleTime integration sample time [s]
+         */
     void SetSampleTime(double sampleTime);
 
     /**
-	 * @brief Set the virtual frame gain
-	 * The virtual frame will evolve from its initial position towards the goal frame
-	 * This gain sets the velocity of the convergence
-	 * @param[in] gain the gain value
-	 */
+         * @brief Set the virtual frame gain
+         * The virtual frame will evolve from its initial position towards the goal frame
+         * This gain sets the velocity of the convergence
+         * @param[in] gain the gain value
+         */
     void SetGain(double gain);
 
     /**
-	 * @brief Reset the virtual frame
-	 * Simply sets the virtual frame to the identity matrix and the error to zero
-	 */
+         * @brief Reset the virtual frame
+         * Simply sets the virtual frame to the identity matrix and the error to zero
+         */
     void ResetState();
 
     /**
-	 * @brief Reset the virtual frame to the given value
-	 * Sets the virtual frame to be the same as the given value
-	 * @param[in] wTv the transformation matrix of the virtual frame w.r.t. the world frame
-	 */
+         * @brief Reset the virtual frame to the given value
+         * Sets the virtual frame to be the same as the given value
+         * @param[in] wTv the transformation matrix of the virtual frame w.r.t. the world frame
+         */
     void ResetState(const Eigen::TransfMatrix& wTv);
 
     /**
-	 * @brief Compute the new virtual frame position
-	 *
-	 * The method updates the position of the virtual frame \<v\> on the basis of the goal frame <g>
-	 * The current tool position <t> is used to prevent the virtual frame <v> from getting too far away from <t>
-	 *
-	 * @param[in] wTt the current tool frame position
-	 * @param[in] wTg the current goal frame position
-	 * @param[out] wTv the new virtual frame position
-	 */
+         * @brief Compute the new virtual frame position
+         *
+         * The method updates the position of the virtual frame \<v\> on the basis of the goal frame <g>
+         * The current tool position <t> is used to prevent the virtual frame <v> from getting too far away from <t>
+         *
+         * @param[in] wTt the current tool frame position
+         * @param[in] wTg the current goal frame position
+         * @param[out] wTv the new virtual frame position
+         */
     void Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMatrix& wTg, Eigen::TransfMatrix& wTv);
 
     /**
-	 * @brief Compute the new virtual frame position
-	 * The method updates the position of the virtual frame <v> on the basis of the requested Cartesian velocity xdotbar
-	 * The current tool position <t> is used to prevent the virtual frame <v> from getting too far away from <t>
-	 * @param[in] wTt the current tool frame position
-	 * @param[in] xdotbar the requested Cartesian velocity
-	 * @param[out] wTv the new virtual frame position
-	 */
+     * @brief Method setting the projector rotation matrix, the normal to the plane must coincide with the z axis, the transformation
+     * matrix must be expressed wrt to the inertial frame.
+     * @param wRp rotation matrix in between the world and the projector frame
+     */
+    void SetProjectorRotMatrix(const Eigen::RotMatrix wRp);
+
+    /**
+         * @brief Compute the new virtual frame position
+         * The method updates the position of the virtual frame <v> on the basis of the requested Cartesian velocity
+     * xdotbar
+         * The current tool position <t> is used to prevent the virtual frame <v> from getting too far away from <t>
+         * @param[in] wTt the current tool frame position
+         * @param[in] xdotbar the requested Cartesian velocity
+         * @param[out] wTv the new virtual frame position
+         */
     void Compute(const Eigen::TransfMatrix& wTt, const Eigen::Vector6d& xdotbar, Eigen::TransfMatrix& wTv);
 
-    void SetUseErrorNorm(bool useErrorNorm)
-    {
-        this->useErrorNorm = useErrorNorm;
-    }
+    void SetUseErrorNorm(bool useErrorNorm) { this->useErrorNorm = useErrorNorm; }
 
     /**
      * @brief Method setting the on track thresholds
@@ -102,28 +119,13 @@ public:
      */
     void SetCrossTrackAllowedDistance(Eigen::VectorXd crossTrackAllowedDistance);
 
-    Eigen::Vector3d GetOnTrackError()
-    {
-        return errorTrack_;
-    }
-    Eigen::Vector3d GetCrossTrackError()
-    {
-        return errorCross_;
-    }
-    const Eigen::Vector6d& getVirtualFrameToGoalError() const
-    {
-        return virtualFrameToGoalError_;
-    }
+    Eigen::Vector3d GetOnTrackError() { return errorTrack_; }
+    Eigen::Vector3d GetCrossTrackError() { return errorCross_; }
+    const Eigen::Vector6d& getVirtualFrameToGoalError() const { return virtualFrameToGoalError_; }
 
-    const Eigen::Vector6d& getToolToVirtualFrameError() const
-    {
-        return toolToVirtualFrameError_;
-    }
+    const Eigen::Vector6d& getToolToVirtualFrameError() const { return toolToVirtualFrameError_; }
 
-    const Eigen::TransfMatrix& getwTvirt() const
-    {
-        return wTv_;
-    }
+    const Eigen::TransfMatrix& getwTvirt() const { return wTv_; }
 
 private:
     double sampleTime_;
@@ -136,10 +138,13 @@ private:
     Eigen::Vector6d virtualFrameVelocity_;
     Eigen::TransfMatrix wTv_;
     VFType vftype_;
+    VFTypeProjector vfprojector_;
     Eigen::TransfMatrix wTg_;
     Eigen::Vector3d errorTrack_;
     Eigen::Vector3d errorCross_;
     bool useErrorNorm;
+    Eigen::RotMatrix wRp_;
+
 };
 }
 
