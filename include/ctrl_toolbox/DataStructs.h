@@ -25,30 +25,6 @@ struct LatLong {
     }
 };
 
-struct ADPGains {
-    Eigen::Vector6d Kl = {}; //!< Pose error Proportional gain
-    Eigen::Vector9d Kg = {}; //!< Dynamic parameters update law gain
-    Eigen::Vector6d Ks = {}; //!< Velocity error Proportional gain
-    Eigen::Vector9d gamma = {};
-    Eigen::Vector3d upGB_m = {};
-    Eigen::Vector3d lowGB_m = {};
-    Eigen::Vector3d up_f = {};
-    Eigen::Vector3d low_f = {};
-    Eigen::Vector3d up_m = {};
-    Eigen::Vector3d low_m = {};
-    Eigen::Vector9d en_integration = {};
-    
-    Eigen::Vector6d up_control = {};
-    Eigen::Vector6d low_control = {};
-
-
-    //double Kff = { 0.0 }; //!< Feed-forward gain
-    //double N = { 0.0 }; //!< Maximum gain for derivative part
-    //double Tr = { 0.0 }; //!< Tracking time constant for anti-windup
-
-    ADPGains() = default;
-};
-
 }
 
 #endif // CTRL_TOOLBOX_DATASTRUCTS_H

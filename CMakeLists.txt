@@ -35,6 +35,7 @@ set_target_properties(ctrl_toolbox PROPERTIES LINKER_LANGUAGE CXX)
 # paths.
 target_include_directories(ctrl_toolbox PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/template_class>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/ctrl_toolbox>
     $<INSTALL_INTERFACE:include>
     PRIVATE src)
@@ -59,6 +60,7 @@ install(TARGETS ctrl_toolbox EXPORT ctrl_toolboxConfig
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # This is for Windows
 install(DIRECTORY include/ctrl_toolbox DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY src/template_class DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # This makes the project importable from the install directory
 # Put config file in per-project dir (name MUST match), can also
