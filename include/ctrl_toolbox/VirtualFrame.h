@@ -144,6 +144,7 @@ private:
     Eigen::Vector3d errorCross_;
     bool useErrorNorm;
     Eigen::RotMatrix wRp_;
+    Eigen::TransfMatrix wTvInitial_;
 
 };
 }

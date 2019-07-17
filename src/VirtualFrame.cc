@@ -52,6 +52,7 @@ void VirtualFrame::SetCrossTrackAllowedDistance(Eigen::VectorXd crossTrackAllowe
 void VirtualFrame::ResetState(const Eigen::TransfMatrix& wTv)
 {
     wTv_ = wTv;
+    wTvInitial_ = wTv;
     toolToVirtualFrameError_.setZero();
 }
 
@@ -71,6 +72,7 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMa
         Eigen::Matrix3d P = (Eigen::Matrix3d::Identity() - projectorVector_worldFrame * projectorVector_worldFrame.transpose());
         virtualFrameToGoalError_.SetSecondVect3(P*virtualFrameToGoalError_.GetSecondVect3());
         virtualFrameToGoalError_.SetFirstVect3(P*virtualFrameToGoalError_.GetFirstVect3());
+
     }
 
     if (useErrorNorm == true) {
@@ -95,6 +97,12 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMa
 void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::Vector6d& xdotbar, Eigen::TransfMatrix& wTv)
 {
     toolToVirtualFrameError_ = rml::CartesianError(wTt, wTv);
+    if(vfprojector_ == OnPlane ){
+        Eigen::Vector3d projectorVector_worldFrame = wRp_.col(2);
+        Eigen::Matrix3d P = (Eigen::Matrix3d::Identity() - projectorVector_worldFrame * projectorVector_worldFrame.transpose());
+        toolToVirtualFrameError_ .SetSecondVect3(P*toolToVirtualFrameError_ .GetSecondVect3());
+        toolToVirtualFrameError_ .SetFirstVect3(P*toolToVirtualFrameError_ .GetFirstVect3());
+    }
 
     bool outOfReach = false;
     Eigen::Vector3d errorLinear, xdotbarLinear;
@@ -113,6 +121,8 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::Vector6d
                 crossTrackAllowedDistance_(0), crossTrackAllowedDistance_(1), 0, 1, errorCross_.norm());
             sigma = std::min(sigmaTrack, sigmaCross);
             virtualFrameVelocity_.SetSecondVect3(xdotbarLinear * sigma);
+            std::cout << "OUT OF REACH !!!"<<std::endl;
+
         }
     }
     if (!outOfReach) {
