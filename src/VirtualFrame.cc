@@ -9,8 +9,8 @@
 
 namespace ctb {
 
-VirtualFrame::VirtualFrame(VFType vft, VFTypeProjector vfprojector)
-    : vftype_(vft)
+VirtualFrame::VirtualFrame(VFType vft, VFTypeProjector vfprojector): ComputeTrajectory()
+    , vftype_(vft)
     , vfprojector_(vfprojector)
     , useErrorNorm(false)
 {
@@ -30,24 +30,6 @@ void VirtualFrame::SetSampleTime(double sampleTime) { sampleTime_ = sampleTime; 
 void VirtualFrame::SetGain(double gain) { virtualFrameGain_ = gain; }
 
 void VirtualFrame::ResetState() { toolToVirtualFrameError_.setZero(); }
-
-void VirtualFrame::SetOnTrackAllowedDistance(Eigen::VectorXd onTrackAllowedDistance)
-{
-    if (onTrackAllowedDistance.size() != 2) {
-        std::cerr << "[WARNING] On track allowed distance should be of size =2, using default values" << std::endl;
-    } else {
-        onTrackAllowedDistance_ = onTrackAllowedDistance;
-    }
-}
-
-void VirtualFrame::SetCrossTrackAllowedDistance(Eigen::VectorXd crossTrackAllowedDistance)
-{
-    if (crossTrackAllowedDistance.size() != 2) {
-        std::cerr << "[WARNING] Cross track allowed distance should be of size = 2, using defalut value" << std::endl;
-    } else {
-        crossTrackAllowedDistance_ = crossTrackAllowedDistance;
-    }
-}
 
 void VirtualFrame::ResetState(const Eigen::TransfMatrix& wTv)
 {
@@ -121,7 +103,6 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::Vector6d
                 crossTrackAllowedDistance_(0), crossTrackAllowedDistance_(1), 0, 1, errorCross_.norm());
             sigma = std::min(sigmaTrack, sigmaCross);
             virtualFrameVelocity_.SetSecondVect3(xdotbarLinear * sigma);
-            std::cout << "OUT OF REACH !!!"<<std::endl;
 
         }
     }

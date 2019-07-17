@@ -9,7 +9,7 @@
 #define VIRTUAL_FRAME_H_
 
 #include <rml/RML.h>
-
+#include "ctrl_toolbox/ComputeTrajectory.h"
 namespace ctb {
 
 /**
@@ -25,7 +25,7 @@ namespace ctb {
  *
  * A mechanism is implemented to avoid that the virtual frame "runs away" too much from the tool frame.
  */
-class VirtualFrame {
+class VirtualFrame: public ComputeTrajectory {
 
 public:
     enum VFType {
@@ -73,7 +73,7 @@ public:
          * Sets the virtual frame to be the same as the given value
          * @param[in] wTv the transformation matrix of the virtual frame w.r.t. the world frame
          */
-    void ResetState(const Eigen::TransfMatrix& wTv);
+    void ResetState(const Eigen::TransfMatrix& wTv) override;
 
     /**
          * @brief Compute the new virtual frame position
@@ -85,7 +85,7 @@ public:
          * @param[in] wTg the current goal frame position
          * @param[out] wTv the new virtual frame position
          */
-    void Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMatrix& wTg, Eigen::TransfMatrix& wTv);
+    void Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMatrix& wTg, Eigen::TransfMatrix& wTv) override;
 
     /**
      * @brief Method setting the projector rotation matrix, the normal to the plane must coincide with the z axis, the transformation
@@ -107,20 +107,6 @@ public:
 
     void SetUseErrorNorm(bool useErrorNorm) { this->useErrorNorm = useErrorNorm; }
 
-    /**
-     * @brief Method setting the on track thresholds
-     * @param onTrackAllowedDistance on track thresholds
-     */
-    void SetOnTrackAllowedDistance(Eigen::VectorXd onTrackAllowedDistance);
-
-    /**
-     * @brief Method setting the cross track thresholds
-     * @param crossTrackAllowedDistance cross track thresholds
-     */
-    void SetCrossTrackAllowedDistance(Eigen::VectorXd crossTrackAllowedDistance);
-
-    Eigen::Vector3d GetOnTrackError() { return errorTrack_; }
-    Eigen::Vector3d GetCrossTrackError() { return errorCross_; }
     const Eigen::Vector6d& getVirtualFrameToGoalError() const { return virtualFrameToGoalError_; }
 
     const Eigen::Vector6d& getToolToVirtualFrameError() const { return toolToVirtualFrameError_; }
@@ -128,23 +114,16 @@ public:
     const Eigen::TransfMatrix& getwTvirt() const { return wTv_; }
 
 private:
-    double sampleTime_;
     double virtualFrameGain_;
-    Eigen::VectorXd onTrackAllowedDistance_;
-    Eigen::VectorXd crossTrackAllowedDistance_;
     Eigen::Vector6d toolToVirtualFrameError_;
     Eigen::Vector6d virtualFrameToGoalError_;
     Eigen::Vector6d normalizedVirtualFrameToGoalError_;
     Eigen::Vector6d virtualFrameVelocity_;
-    Eigen::TransfMatrix wTv_;
     VFType vftype_;
     VFTypeProjector vfprojector_;
-    Eigen::TransfMatrix wTg_;
-    Eigen::Vector3d errorTrack_;
-    Eigen::Vector3d errorCross_;
     bool useErrorNorm;
     Eigen::RotMatrix wRp_;
-    Eigen::TransfMatrix wTvInitial_;
+
 
 };
 }
