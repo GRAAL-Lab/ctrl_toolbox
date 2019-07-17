@@ -22,10 +22,13 @@ void LineOfSight::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMat
     // Computing closest point to trajectory
     Eigen::MatrixXd P = normTrajectory * normTrajectory.transpose();
     Eigen::Vector3d closestPoint = P * wTt.GetTransl();
+    std::cout << "closestPoint = "<< closestPoint.transpose()<<std::endl;
 
     // Incrementing closest point
     Eigen::Vector3d increment = normTrajectory * delta_;
     Eigen::Vector3d newPosition = closestPoint + increment;
+    std::cout <<"increment = "<<increment.transpose()<<std::endl;
+    std::cout << "newPosition = "<< newPosition.transpose()<<std::endl;
 
     // Definition of new goal
     wTv.SetTransl(newPosition);
