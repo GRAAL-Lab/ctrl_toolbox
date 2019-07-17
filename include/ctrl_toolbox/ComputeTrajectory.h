@@ -4,10 +4,15 @@
 #include <rml/RML.h>
 
 namespace ctb {
+
+enum ComputeTrajectoryProjector {
+    Default,
+    OnPlane,
+};
 class ComputeTrajectory {
 
 public:
-    ComputeTrajectory();
+    ComputeTrajectory(ComputeTrajectoryProjector computeTrajectoryProjector = Default);
     virtual ~ComputeTrajectory();
     /**
          * @brief Compute the new virtual frame position
@@ -36,6 +41,14 @@ public:
     Eigen::Vector3d GetOnTrackError() { return errorTrack_; }
     Eigen::Vector3d GetCrossTrackError() { return errorCross_; }
 
+    /**
+     * @brief Method setting the projector rotation matrix, the normal to the plane must coincide with the z axis, the
+     * transformation
+     * matrix must be expressed wrt to the inertial frame.
+     * @param wRp rotation matrix in between the world and the projector frame
+     */
+    void SetProjectorRotMatrix(const Eigen::RotMatrix wRp);
+
 protected:
     double sampleTime_;
     double virtualFrameGain_;
@@ -46,6 +59,8 @@ protected:
     Eigen::Vector3d errorTrack_;
     Eigen::Vector3d errorCross_;
     Eigen::TransfMatrix wTvInitial_;
+    Eigen::RotMatrix wRp_;
+    ComputeTrajectoryProjector computeTrajectoryProjector_;
 };
 }
 

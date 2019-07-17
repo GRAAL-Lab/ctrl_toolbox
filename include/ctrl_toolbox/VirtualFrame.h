@@ -34,14 +34,11 @@ public:
         Linear
     };
 
-    enum VFTypeProjector {
-        Default,
-        OnPlane,
-    };
+
     /**
          * @brief Default constructor
          */
-    VirtualFrame(VFType vft = FullPose, VFTypeProjector vfprojector = Default);
+    VirtualFrame(VFType vft = FullPose, ComputeTrajectoryProjector vfprojector = Default);
 
     /**
          * @brief Set the integration sample time
@@ -87,12 +84,7 @@ public:
          */
     void Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMatrix& wTg, Eigen::TransfMatrix& wTv) override;
 
-    /**
-     * @brief Method setting the projector rotation matrix, the normal to the plane must coincide with the z axis, the transformation
-     * matrix must be expressed wrt to the inertial frame.
-     * @param wRp rotation matrix in between the world and the projector frame
-     */
-    void SetProjectorRotMatrix(const Eigen::RotMatrix wRp);
+
 
     /**
          * @brief Compute the new virtual frame position
@@ -120,9 +112,8 @@ private:
     Eigen::Vector6d normalizedVirtualFrameToGoalError_;
     Eigen::Vector6d virtualFrameVelocity_;
     VFType vftype_;
-    VFTypeProjector vfprojector_;
     bool useErrorNorm;
-    Eigen::RotMatrix wRp_;
+
 
 
 };

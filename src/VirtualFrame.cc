@@ -9,9 +9,8 @@
 
 namespace ctb {
 
-VirtualFrame::VirtualFrame(VFType vft, VFTypeProjector vfprojector): ComputeTrajectory()
+VirtualFrame::VirtualFrame(VFType vft, ComputeTrajectoryProjector vfprojector): ComputeTrajectory(vfprojector)
     , vftype_(vft)
-    , vfprojector_(vfprojector)
     , useErrorNorm(false)
 {
 
@@ -38,8 +37,6 @@ void VirtualFrame::ResetState(const Eigen::TransfMatrix& wTv)
     toolToVirtualFrameError_.setZero();
 }
 
-void VirtualFrame::SetProjectorRotMatrix(const Eigen::RotMatrix wRp) { wRp_ = wRp; }
-
 void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMatrix& wTg, Eigen::TransfMatrix& wTv)
 {
 
@@ -49,7 +46,7 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMa
     }
 
     virtualFrameToGoalError_ = rml::CartesianError(wTv_, wTg);
-    if(vfprojector_ == OnPlane ){
+    if(computeTrajectoryProjector_ == OnPlane ){
         Eigen::Vector3d projectorVector_worldFrame = wRp_.col(2);
         Eigen::Matrix3d P = (Eigen::Matrix3d::Identity() - projectorVector_worldFrame * projectorVector_worldFrame.transpose());
         virtualFrameToGoalError_.SetSecondVect3(P*virtualFrameToGoalError_.GetSecondVect3());
@@ -79,7 +76,7 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMa
 void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::Vector6d& xdotbar, Eigen::TransfMatrix& wTv)
 {
     toolToVirtualFrameError_ = rml::CartesianError(wTt, wTv);
-    if(vfprojector_ == OnPlane ){
+    if(computeTrajectoryProjector_ == OnPlane ){
         Eigen::Vector3d projectorVector_worldFrame = wRp_.col(2);
         Eigen::Matrix3d P = (Eigen::Matrix3d::Identity() - projectorVector_worldFrame * projectorVector_worldFrame.transpose());
         toolToVirtualFrameError_ .SetSecondVect3(P*toolToVirtualFrameError_ .GetSecondVect3());
