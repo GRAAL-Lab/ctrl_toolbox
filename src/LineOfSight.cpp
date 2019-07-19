@@ -32,21 +32,30 @@ void LineOfSight::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMat
     std::cout << "closestPoint = " << closestPoint.transpose() << std::endl;
 
     // Incrementing closest point
-    Eigen::Vector3d increment = normTrajectory * delta_;
-    Eigen::Vector3d newPosition = closestPoint + increment;
-    // problem if negative not working! TODO
-    for (int i = 0; i < 3; i++) {
-        if (wTg.GetTransl()(i) > 0.0) {
-            rml::SaturateScalar(wTg.GetTransl()(i), newPosition(i));
-        }
-        else {
-            if(newPosition(i)<0.0){
-                double newPositionAbsoluteValue = std::fabs(newPosition(i));
-                rml::SaturateScalar(std::fabs(wTg.GetTransl()(i)),newPositionAbsoluteValue);
-                newPosition(i) = - newPositionAbsoluteValue;
-            }
-        }
+    double currentDelta;
+    double DistanceCurrentPointGoal = (wTg.GetTransl()-closestPoint).norm();
+    if (DistanceCurrentPointGoal>delta_){
+        currentDelta = delta_;
     }
+    else{
+        currentDelta = DistanceCurrentPointGoal;
+    }
+    Eigen::Vector3d increment = normTrajectory * currentDelta;
+    Eigen::Vector3d newPosition = closestPoint + increment;
+
+    // problem if negative not working! TODO
+    //for (int i = 0; i < 3; i++) {
+    //    if (wTg.GetTransl()(i) > 0.0) {
+    //        rml::SaturateScalar(wTg.GetTransl()(i), newPosition(i));
+    //    }
+    //    else {
+    //        if(newPosition(i)<0.0){
+    //            double newPositionAbsoluteValue = std::fabs(newPosition(i));
+    //            rml::SaturateScalar(std::fabs(wTg.GetTransl()(i)),newPositionAbsoluteValue);
+    //            newPosition(i) = - newPositionAbsoluteValue;
+    //        }
+    //    }
+    //}
     std::cout << "increment = " << increment.transpose() << std::endl;
     std::cout << "newPosition = " << newPosition.transpose() << std::endl;
 
