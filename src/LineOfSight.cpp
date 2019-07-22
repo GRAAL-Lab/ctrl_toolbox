@@ -28,27 +28,28 @@ void LineOfSight::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMat
 
     // Computing closest point to trajectory
     Eigen::MatrixXd P = normTrajectory * normTrajectory.transpose();
-    Eigen::Vector3d closestPoint = P * wTt_traslation + (Eigen::MatrixXd::Identity(3,3)-P)*wTt_initial_traslation;
-    std::cout << "normTrajectory = "<<normTrajectory.transpose()<<std::endl;
-    std::cout << "Projector = "<< P <<std::endl;
-    std::cout << "closest point with no increment = "<< ((Eigen::MatrixXd::Identity(3,3)-P)*wTt_initial_traslation).transpose()<<std::endl;
+
+    Eigen::Vector3d initialT_t = wTt_traslation- wTt_initial_traslation;
+    std::cout << "intial T t = " << initialT_t.transpose() << std::endl;
+    Eigen::Vector3d closestPoint = P * initialT_t + wTt_initial_traslation;
+    std::cout << "normTrajectory = " << normTrajectory.transpose() << std::endl;
+    std::cout << "Projector = " << P << std::endl;
+    std::cout << "closest point with no increment = " << (P * initialT_t).transpose() << std::endl;
     std::cout << "closestPoint = " << closestPoint.transpose() << std::endl;
 
     // Incrementing closest point
-    double DistanceCurrentPointGoal = (wTg.GetTransl()-closestPoint).norm();
-    Eigen::Vector3d increment ;
+    double DistanceCurrentPointGoal = (wTg.GetTransl() - closestPoint).norm();
+    Eigen::Vector3d increment;
     Eigen::Vector3d newPosition;
-    if (DistanceCurrentPointGoal>delta_){
+    if (DistanceCurrentPointGoal > delta_) {
         increment = normTrajectory * delta_;
         newPosition = closestPoint + increment;
-    }
-    else{
+    } else {
         newPosition = wTg.GetTransl();
     }
 
-
     // problem if negative not working! TODO
-    //for (int i = 0; i < 3; i++) {
+    // for (int i = 0; i < 3; i++) {
     //    if (wTg.GetTransl()(i) > 0.0) {
     //        rml::SaturateScalar(wTg.GetTransl()(i), newPosition(i));
     //    }
