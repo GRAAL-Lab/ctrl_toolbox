@@ -96,7 +96,6 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
-build/
 develop-eggs/
 dist/
 downloads/
@@ -147,7 +146,6 @@ target/
 
 # R O S
 
-build/
 bin/
 lib/
 msg_gen/

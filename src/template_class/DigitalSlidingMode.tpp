@@ -83,7 +83,7 @@ namespace ctb{
         double u = (sliding_state_/this->sample_time_ - alfa_beta[0])/alfa_beta[1];
 
         auto s_comp=this->s_(GetRef,GetFbk, this->parameter_);
-        sliding_state_= -this->k_*s_comp*this->sample_time_;
+        sliding_state_=sliding_state_+ (-this->k_*sliding_state_-s_comp)*this->sample_time_;
 
 
         if (this->saturation_ > 0)
