@@ -28,20 +28,24 @@ void LineOfSight::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMat
 
     // Computing closest point to trajectory
     Eigen::MatrixXd P = normTrajectory * normTrajectory.transpose();
-    Eigen::Vector3d closestPoint = P * wTt_traslation + wTt_initial_traslation;
+    Eigen::Vector3d closestPoint = P * wTt_traslation + (Eigen::MatrixXd::Identity(3,3)-P)*wTt_initial_traslation;
+    std::cout << "normTrajectory = "<<normTrajectory.transpose()<<std::endl;
+    std::cout << "Projector = "<< P <<std::endl;
+    std::cout << "closest point with no increment = "<< ((Eigen::MatrixXd::Identity(3,3)-P)*wTt_initial_traslation).transpose()<<std::endl;
     std::cout << "closestPoint = " << closestPoint.transpose() << std::endl;
 
     // Incrementing closest point
-    double currentDelta;
     double DistanceCurrentPointGoal = (wTg.GetTransl()-closestPoint).norm();
+    Eigen::Vector3d increment ;
+    Eigen::Vector3d newPosition;
     if (DistanceCurrentPointGoal>delta_){
-        currentDelta = delta_;
+        increment = normTrajectory * delta_;
+        newPosition = closestPoint + increment;
     }
     else{
-        currentDelta = DistanceCurrentPointGoal;
+        newPosition = wTg.GetTransl();
     }
-    Eigen::Vector3d increment = normTrajectory * currentDelta;
-    Eigen::Vector3d newPosition = closestPoint + increment;
+
 
     // problem if negative not working! TODO
     //for (int i = 0; i < 3; i++) {
