@@ -88,11 +88,12 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::Vector6d
     if (vftype_ == Linear || vftype_ == FullPose) {
         errorLinear = toolToVirtualFrameError_.GetSecondVect3();
         xdotbarLinear = xdotbar.GetSecondVect3();
+        Eigen::Vector3d n_vg = (wTg_.GetTransl() - wTv.GetTransl()).normalized();
+        errorTrack_ = (n_vg * n_vg.transpose()) * errorLinear;
+        errorCross_ = (Eigen::Matrix3d::Identity() - n_vg * n_vg.transpose()) * errorLinear;
         if ((errorLinear + xdotbarLinear * sampleTime_).norm() > errorLinear.norm()) {
             outOfReach = true;
-            Eigen::Vector3d n_vg = (wTg_.GetTransl() - wTv.GetTransl()).normalized();
-            errorTrack_ = (n_vg * n_vg.transpose()) * errorLinear;
-            errorCross_ = (Eigen::Matrix3d::Identity() - n_vg * n_vg.transpose()) * errorLinear;
+
             double sigma;
             double sigmaTrack = rml::DecreasingBellShapedFunction(
                 onTrackAllowedDistance_(0), onTrackAllowedDistance_(1), 0, 1, errorTrack_.norm());

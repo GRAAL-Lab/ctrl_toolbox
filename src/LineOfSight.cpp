@@ -52,7 +52,13 @@ void LineOfSight::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMat
     // Definition of new goal
     wTv.SetTransl(newPosition);
     wTgCurrent_ = wTv;
-    Eigen::Vector3d errorLinear = wTg.GetTransl()-wTt.GetTransl();
+    Eigen::Vector3d errorLinear = wTv.GetTransl()-wTt.GetTransl();
+    if (computeTrajectoryProjector_ == OnPlane) {
+        Eigen::Vector3d projectorVector_worldFrame = wRp_.col(2);
+        Eigen::Matrix3d P_OnPlane
+            = (Eigen::Matrix3d::Identity() - projectorVector_worldFrame * projectorVector_worldFrame.transpose());
+        errorLinear = P_OnPlane*errorLinear;
+    }
     errorTrack_ = (normTrajectory * normTrajectory.transpose()) * (errorLinear);
     errorCross_ = (Eigen::Matrix3d::Identity() - normTrajectory * normTrajectory.transpose()) * errorLinear;
 }
