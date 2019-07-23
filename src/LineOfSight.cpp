@@ -11,9 +11,6 @@ void LineOfSight::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMat
 {
     // Computing trajectory and norm to the trajectory
     trajectory_ = wTg.GetTransl() - wTvInitial_.GetTransl();
-    std::cout << "wTg = " << wTg.GetTransl().transpose() << std::endl;
-    std::cout << "wTv_initial = " << wTvInitial_.GetTransl().transpose() << std::endl;
-    std::cout << "wTt_current = " << wTt.GetTransl().transpose() << std::endl;
     Eigen::Vector3d wTt_traslation = wTt.GetTransl();
     Eigen::Vector3d wTt_initial_traslation = wTvInitial_.GetTransl();
     if (computeTrajectoryProjector_ == OnPlane) {
@@ -28,14 +25,9 @@ void LineOfSight::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMat
 
     // Computing closest point to trajectory
     Eigen::MatrixXd P = normTrajectory * normTrajectory.transpose();
-
     Eigen::Vector3d initialT_t = wTt_traslation- wTt_initial_traslation;
-    std::cout << "intial T t = " << initialT_t.transpose() << std::endl;
     Eigen::Vector3d closestPoint = P * initialT_t + wTt_initial_traslation;
-    std::cout << "normTrajectory = " << normTrajectory.transpose() << std::endl;
-    std::cout << "Projector = " << P << std::endl;
-    std::cout << "closest point with no increment = " << (P * initialT_t).transpose() << std::endl;
-    std::cout << "closestPoint = " << closestPoint.transpose() << std::endl;
+
 
     // Incrementing closest point
     double DistanceCurrentPointGoal = (wTg.GetTransl() - closestPoint).norm();
