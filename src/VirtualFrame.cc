@@ -109,5 +109,6 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& wTt, const Eigen::Vector6d
     // move the virtual frame
     wTv_ = wTv_.Integral(virtualFrameVelocity_, sampleTime_);
     wTv = wTv_;
+    wTgCurrent_ = wTv;
 }
 }

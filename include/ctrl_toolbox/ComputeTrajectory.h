@@ -39,7 +39,9 @@ public:
     void SetCrossTrackAllowedDistance(Eigen::VectorXd crossTrackAllowedDistance);
 
     Eigen::Vector3d GetOnTrackError() { return errorTrack_; }
+
     Eigen::Vector3d GetCrossTrackError() { return errorCross_; }
+    Eigen::TransfMatrix GetCurrentGoal() {return wTgCurrent_;}
 
     /**
      * @brief Method setting the projector rotation matrix, the normal to the plane must coincide with the z axis, the
@@ -61,6 +63,7 @@ protected:
     Eigen::TransfMatrix wTvInitial_;
     Eigen::RotMatrix wRp_;
     ComputeTrajectoryProjector computeTrajectoryProjector_;
+    Eigen::TransfMatrix wTgCurrent_;
 };
 }
 

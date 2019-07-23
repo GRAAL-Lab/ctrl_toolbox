@@ -41,6 +41,7 @@ void LineOfSight::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMat
     double DistanceCurrentPointGoal = (wTg.GetTransl() - closestPoint).norm();
     Eigen::Vector3d increment;
     Eigen::Vector3d newPosition;
+
     if (DistanceCurrentPointGoal > delta_) {
         increment = normTrajectory * delta_;
         newPosition = closestPoint + increment;
@@ -48,24 +49,12 @@ void LineOfSight::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMat
         newPosition = wTg.GetTransl();
     }
 
-    // problem if negative not working! TODO
-    // for (int i = 0; i < 3; i++) {
-    //    if (wTg.GetTransl()(i) > 0.0) {
-    //        rml::SaturateScalar(wTg.GetTransl()(i), newPosition(i));
-    //    }
-    //    else {
-    //        if(newPosition(i)<0.0){
-    //            double newPositionAbsoluteValue = std::fabs(newPosition(i));
-    //            rml::SaturateScalar(std::fabs(wTg.GetTransl()(i)),newPositionAbsoluteValue);
-    //            newPosition(i) = - newPositionAbsoluteValue;
-    //        }
-    //    }
-    //}
-    std::cout << "increment = " << increment.transpose() << std::endl;
-    std::cout << "newPosition = " << newPosition.transpose() << std::endl;
-
     // Definition of new goal
     wTv.SetTransl(newPosition);
+    wTgCurrent_ = wTv;
+    Eigen::Vector3d errorLinear = wTg.GetTransl()-wTt.GetTransl();
+    errorTrack_ = (normTrajectory * normTrajectory.transpose()) * (errorLinear);
+    errorCross_ = (Eigen::Matrix3d::Identity() - normTrajectory * normTrajectory.transpose()) * errorLinear;
 }
 
 void LineOfSight::ResetState(const Eigen::TransfMatrix& wTv) { wTvInitial_ = wTv; }
