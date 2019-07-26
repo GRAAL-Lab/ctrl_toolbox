@@ -30,7 +30,14 @@ void LineOfSight::Compute(const Eigen::TransfMatrix& wTt, const Eigen::TransfMat
 
 
     // Incrementing closest point
-    double DistanceCurrentPointGoal = (wTg.GetTransl() - closestPoint).norm();
+    Eigen::Vector3d goalTraslation = wTg.GetTransl();
+    if(computeTrajectoryProjector_ == OnPlane){
+        Eigen::Vector3d projectorVector_worldFrame = wRp_.col(2);
+        Eigen::Matrix3d P_OnPlane
+            = (Eigen::Matrix3d::Identity() - projectorVector_worldFrame * projectorVector_worldFrame.transpose());
+        goalTraslation =P_OnPlane*goalTraslation;
+    }
+    double DistanceCurrentPointGoal = (goalTraslation - closestPoint).norm();
     Eigen::Vector3d increment;
     Eigen::Vector3d newPosition;
 
