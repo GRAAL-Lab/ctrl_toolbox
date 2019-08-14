@@ -28,7 +28,7 @@ public:
 
     void Reset();
 
-    void Init(const Eigen::VectorXd initialState);
+    void Init(const Eigen::VectorXd initialState, const Eigen::MatrixXd sigma);
 
     Eigen::VectorXd GetState();
 

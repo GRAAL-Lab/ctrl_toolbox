@@ -96,7 +96,11 @@ void ExtendedKalmanFilter::ApplyMeasurements()
 
 void ExtendedKalmanFilter::Reset() {}
 
-void ExtendedKalmanFilter::Init(const Eigen::VectorXd initialState) { x_ = initialState; }
+void ExtendedKalmanFilter::Init(const Eigen::VectorXd initialState, const Eigen::MatrixXd sigma) {
+    x_ = initialState;
+    Sigma_ = sigma;
+    isFirst_ = true;
+}
 
 Eigen::VectorXd ExtendedKalmanFilter::GetState() { return x_; }
 
