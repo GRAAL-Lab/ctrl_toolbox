@@ -28,6 +28,7 @@ namespace ctb {
     class DigitalSlidingMode{
 
     public:
+        DigitalSlidingMode():initialized_(false){};
         DigitalSlidingMode( std::vector<double> getAlphaBeta(const std::vector<double>,T ) ,
                             double s(const double,const double, T ), T param,
                             double sampleTime=0,unsigned short int n_state=2, double saturation=0);
@@ -94,7 +95,7 @@ namespace ctb {
     class DigitalSecOrdSlidingMode: public DigitalSlidingMode<T> {
 
     public:
-
+        DigitalSecOrdSlidingMode(){this->initialized_ = false;};
         DigitalSecOrdSlidingMode( std::vector<double> getAlphaBeta(const std::vector<double>, T) ,
         double s(const double,const double, T), T param,
         double sampleTime=0,unsigned short int n_state=2, double saturation=0)
