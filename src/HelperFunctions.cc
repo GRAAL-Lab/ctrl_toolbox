@@ -9,6 +9,29 @@ double clamp(double n, double lower, double upper)
     return std::max(lower, std::min(n, upper));
 }
 
+
+Eigen::VectorXd FilterAngularJump(const Eigen::VectorXd primaryHeading, const Eigen::VectorXd otherHeading)
+{
+
+    Eigen::VectorXd out;
+    out.resize(primaryHeading.size());
+    for (int i = 0; i < primaryHeading.size(); i++) {
+        double diff = primaryHeading(i) - otherHeading(i);
+
+        out(i) = otherHeading(i);
+
+        if (diff > M_PI)
+            out(i) += 2.0 * M_PI;
+        else {
+            if (diff < -M_PI) {
+                out(i) -= 2.0 * M_PI;
+            }
+        }
+    }
+
+    return out;
+}
+
 double HeadingErrorRad(double to, double from)
 {
     //std::cout << " HeadingErrorRad(double from, double to)" << std::endl;
