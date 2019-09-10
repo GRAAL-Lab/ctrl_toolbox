@@ -1,7 +1,0 @@
-/home/marco/group_project/ctrl_toolbox/build/CMakeFiles/install/strip.dir
-/home/marco/group_project/ctrl_toolbox/build/CMakeFiles/edit_cache.dir
-/home/marco/group_project/ctrl_toolbox/build/CMakeFiles/rebuild_cache.dir
-/home/marco/group_project/ctrl_toolbox/build/CMakeFiles/list_install_components.dir
-/home/marco/group_project/ctrl_toolbox/build/CMakeFiles/install/local.dir
-/home/marco/group_project/ctrl_toolbox/build/CMakeFiles/ctrl_toolbox.dir
-/home/marco/group_project/ctrl_toolbox/build/CMakeFiles/install.dir
