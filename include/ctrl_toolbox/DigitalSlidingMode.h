@@ -109,6 +109,8 @@ namespace ctb {
 	    * @return	    control output
 	    */
         double compute( double GetRef , double GetFbk);
+	void setState(const std::vector<double>& state, double s_state){state_=state;sliding_state_=s_state;};
+
 
     private:
         double sliding_state_; //!< sliding state
