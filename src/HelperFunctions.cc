@@ -10,25 +10,22 @@ double clamp(double n, double lower, double upper)
 }
 
 
-Eigen::VectorXd FilterAngularJump(const Eigen::VectorXd primaryHeading, const Eigen::VectorXd otherHeading)
+double FilterAngularJump(const double primaryHeading, const double otherHeading)
 {
 
-    Eigen::VectorXd out;
-    out.resize(primaryHeading.size());
-    for (int i = 0; i < primaryHeading.size(); i++) {
-        double diff = primaryHeading(i) - otherHeading(i);
+    double out;
+    double diff = primaryHeading - otherHeading;
 
-        out(i) = otherHeading(i);
+        out = otherHeading;
 
         if (diff > M_PI)
-            out(i) += 2.0 * M_PI;
+            out += 2.0 * M_PI;
         else {
             if (diff < -M_PI) {
-                out(i) -= 2.0 * M_PI;
+                out -= 2.0 * M_PI;
             }
         }
-    }
-
+    
     return out;
 }
 

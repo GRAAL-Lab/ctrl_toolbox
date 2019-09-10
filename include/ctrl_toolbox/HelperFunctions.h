@@ -12,6 +12,9 @@ namespace ctb {
  */
 double clamp(double n, double lower, double upper);
 
+
+double FilterAngularJump(const double primaryHeading, const double otherHeading);
+
 /**
  * @brief HeadingErrorRad
  * @param from
