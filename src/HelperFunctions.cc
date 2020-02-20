@@ -9,23 +9,22 @@ double clamp(double n, double lower, double upper)
     return std::max(lower, std::min(n, upper));
 }
 
-
 double FilterAngularJump(const double primaryHeading, const double otherHeading)
 {
 
     double out;
     double diff = primaryHeading - otherHeading;
 
-        out = otherHeading;
+    out = otherHeading;
 
-        if (diff > M_PI)
-            out += 2.0 * M_PI;
-        else {
-            if (diff < -M_PI) {
-                out -= 2.0 * M_PI;
-            }
+    if (diff > M_PI)
+        out += 2.0 * M_PI;
+    else {
+        if (diff < -M_PI) {
+            out -= 2.0 * M_PI;
         }
-    
+    }
+
     return out;
 }
 
