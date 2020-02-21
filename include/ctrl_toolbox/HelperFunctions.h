@@ -87,6 +87,19 @@ struct HeadingErrorRadFunctor {
         return HeadingErrorRad(from, to);
     }
 };
+
+/**
+ * @brief Degree to radiant conversion function
+ *
+ */
+double Deg2Rad(double deg);
+
+/**
+ * @brief Radiant to degree conversion function
+ *
+ */
+double Rad2Deg(double rad);
+
 }
 
 #endif // CTRL_TOOLBOX_HELPERFUNCTIONS_H

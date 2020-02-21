@@ -68,4 +68,14 @@ void DistanceAndAzimuthRad(const LatLong& from, const LatLong& to, double& dista
 
     azimuthrad = azimuthdeg * M_PI / 180.0;
 }
+
+double Deg2Rad(double deg)
+{
+    return (M_PI / 180.0) * deg;
+}
+
+double Rad2Deg(double rad)
+{
+    return (180.0 / M_PI) * rad;
+}
 }
