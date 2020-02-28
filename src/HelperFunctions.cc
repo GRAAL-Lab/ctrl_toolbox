@@ -78,4 +78,16 @@ double Rad2Deg(double rad)
 {
     return (180.0 / M_PI) * rad;
 }
+
+LatLong LatLong2mCoeff(LatLong LatLong)
+{
+    ctb::LatLong LatLongM;
+    LatLong.latitude = Deg2Rad(LatLong.latitude);
+    LatLong.longitude = Deg2Rad(LatLong.longitude);
+
+    LatLongM.latitude = 111132.92 - 559.82 * cos(2 * LatLong.latitude) + 1.175 * cos(4 * LatLong.latitude) - 0.0023 * cos(6 * LatLong.latitude);
+    LatLongM.longitude = 111412.84 * cos(LatLong.longitude) - 93.5 * cos(3 * LatLong.longitude) + 0.118 * cos(5 * LatLong.longitude);
+
+    return LatLongM;
+}
 }

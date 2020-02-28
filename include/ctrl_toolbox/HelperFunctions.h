@@ -100,6 +100,26 @@ double Deg2Rad(double deg);
  */
 double Rad2Deg(double rad);
 
+LatLong LatLong2mCoeff(LatLong LatLong);
+
+template <class A>
+void Euclidian2MapPoint(A euclidianPoint, ctb::LatLong centroid, ctb::LatLong mapPoint)
+{
+    LatLong LatLonM = LatLong2mCoeff(centroid);
+
+    mapPoint.latitude = centroid.latitude - euclidianPoint[0] / LatLonM.latitude;
+    mapPoint.longitude = centroid.longitude - euclidianPoint[1] / LatLonM.longitude;
+}
+
+template <class A>
+void Map2EuclidianPoint(LatLong mapPoint, ctb::LatLong centroid, A* euclidianPoint)
+{
+    LatLong LatLonM = ctb::LatLong2mCoeff(centroid);
+
+    euclidianPoint[0] = (centroid.longitude - mapPoint.longitude) * LatLonM.longitude;
+    euclidianPoint[1] = (centroid.latitude - mapPoint.latitude) * LatLonM.longitude;
+    euclidianPoint[2] = 0;
+}
 }
 
 #endif // CTRL_TOOLBOX_HELPERFUNCTIONS_H
