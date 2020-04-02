@@ -48,8 +48,6 @@ void SetParamVector(libconfig::Config& confObj, A& param, std::string name)
  */
 double clamp(double n, double lower, double upper);
 
-double FilterAngularJump(const double primaryHeading, const double otherHeading);
-
 /**
  * @brief HeadingErrorRad
  * @param from
@@ -100,24 +98,24 @@ double Deg2Rad(double deg);
  */
 double Rad2Deg(double rad);
 
-LatLong LatLong2mCoeff(LatLong LatLong);
+Eigen::Vector2d LatLong2mCoeff(LatLong LatLong);
 
 template <class A>
-void Euclidian2MapPoint(A*& euclidianPoint, ctb::LatLong centroid, ctb::LatLong& mapPoint)
+void Euclidian2MapPoint(A euclidianPoint, ctb::LatLong centroid, ctb::LatLong& mapPoint)
 {
-    LatLong LatLonM = LatLong2mCoeff(centroid);
+    Eigen::Vector2d LatLonM = LatLong2mCoeff(centroid);
 
-    mapPoint.latitude = centroid.latitude - euclidianPoint[1] / LatLonM.latitude;
-    mapPoint.longitude = centroid.longitude - euclidianPoint[0] / LatLonM.longitude;
+    mapPoint.latitude = centroid.latitude - euclidianPoint[1] / LatLonM[1];
+    mapPoint.longitude = centroid.longitude - euclidianPoint[0] / LatLonM[0];
 }
 
 template <class A>
-void Map2EuclidianPoint(LatLong mapPoint, ctb::LatLong centroid, A*& euclidianPoint)
+void Map2EuclidianPoint(LatLong mapPoint, ctb::LatLong centroid, A euclidianPoint)
 {
-    LatLong LatLonM = ctb::LatLong2mCoeff(centroid);
+    Eigen::Vector2d LatLonM = ctb::LatLong2mCoeff(centroid);
 
-    euclidianPoint[0] = (centroid.longitude - mapPoint.longitude) * LatLonM.longitude;
-    euclidianPoint[1] = (centroid.latitude - mapPoint.latitude) * LatLonM.latitude;
+    euclidianPoint[0] = (centroid.longitude - mapPoint.longitude) * LatLonM[0];
+    euclidianPoint[1] = (centroid.latitude - mapPoint.latitude) * LatLonM[0];
     euclidianPoint[2] = 0;
 }
 }

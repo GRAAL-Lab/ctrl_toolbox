@@ -9,25 +9,6 @@ double clamp(double n, double lower, double upper)
     return std::max(lower, std::min(n, upper));
 }
 
-double FilterAngularJump(const double primaryHeading, const double otherHeading)
-{
-
-    double out;
-    double diff = primaryHeading - otherHeading;
-
-    out = otherHeading;
-
-    if (diff > M_PI)
-        out += 2.0 * M_PI;
-    else {
-        if (diff < -M_PI) {
-            out -= 2.0 * M_PI;
-        }
-    }
-
-    return out;
-}
-
 double HeadingErrorRad(double to, double from)
 {
     //std::cout << " HeadingErrorRad(double from, double to)" << std::endl;
@@ -79,15 +60,15 @@ double Rad2Deg(double rad)
     return (180.0 / M_PI) * rad;
 }
 
-LatLong LatLong2mCoeff(LatLong LatLong)
+Eigen::Vector2d LatLong2mCoeff(LatLong LatLong)
 {
-    ctb::LatLong LatLongM;
+    Eigen::Vector2d LatLongMCoeff;
     LatLong.latitude = Deg2Rad(LatLong.latitude);
     LatLong.longitude = Deg2Rad(LatLong.longitude);
 
-    LatLongM.latitude = 111132.92 - 559.82 * cos(2 * LatLong.latitude) + 1.175 * cos(4 * LatLong.latitude) - 0.0023 * cos(6 * LatLong.latitude);
-    LatLongM.longitude = 111412.84 * cos(LatLong.longitude) - 93.5 * cos(3 * LatLong.longitude) + 0.118 * cos(5 * LatLong.longitude);
+    LatLongMCoeff[1] = 111132.92 - 559.82 * cos(2 * LatLong.latitude) + 1.175 * cos(4 * LatLong.latitude) - 0.0023 * cos(6 * LatLong.latitude);
+    LatLongMCoeff[0] = 111412.84 * cos(LatLong.longitude) - 93.5 * cos(3 * LatLong.longitude) + 0.118 * cos(5 * LatLong.longitude);
 
-    return LatLongM;
+    return LatLongMCoeff;
 }
 }
