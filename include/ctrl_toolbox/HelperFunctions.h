@@ -13,11 +13,11 @@ namespace ctb {
  *
  * An utility templated functor to set a pram from ConfigFIle
  */
-template <class A>
-void SetParam(libconfig::Config& confObj, A& param, std::string name)
+template <typename A, typename B>
+void SetParam(B& confObj, A& param, std::string name)
 {
     try {
-        param = confObj.lookup(name);
+        confObj.lookupValue(name, param);
     } catch (const libconfig::SettingNotFoundException) {
         std::cerr << "No " << name << " setting in configuration file." << std::endl;
     }
@@ -28,15 +28,15 @@ void SetParam(libconfig::Config& confObj, A& param, std::string name)
  *
  * An utility templated functor to set a vector pram from ConfigFIle
  */
-template <class A>
-void SetParamVector(libconfig::Config& confObj, A& param, std::string name)
+template <typename A, typename B>
+void SetParamVector(B& confObj, A& param, std::string name)
 {
     try {
-        const libconfig::Setting& filter_settings = confObj.lookup(name);
+        const libconfig::Setting& settings = confObj.lookup(name);
+        param.resize(settings.getLength());
+        for (int n = 0; n < settings.getLength(); n++) {
 
-        for (int n = 0; n < filter_settings.getLength(); n++) {
-
-            param.at(n) = filter_settings[n];
+            param(n) = settings[n];
         }
     } catch (const libconfig::SettingNotFoundException) {
         std::cerr << "No " << name << " setting in configuration file." << std::endl;
@@ -114,8 +114,8 @@ void Map2EuclidianPoint(LatLong mapPoint, ctb::LatLong centroid, A euclidianPoin
 {
     Eigen::Vector2d LatLonM = ctb::LatLong2mCoeff(centroid);
 
-    euclidianPoint[0] = (centroid.longitude - mapPoint.longitude) * LatLonM[0];
-    euclidianPoint[1] = (centroid.latitude - mapPoint.latitude) * LatLonM[0];
+    euclidianPoint[0] = (mapPoint.latitude - centroid.latitude) * LatLonM[1];
+    euclidianPoint[1] = (mapPoint.longitude - centroid.longitude) * LatLonM[0];
     euclidianPoint[2] = 0;
 }
 }
