@@ -3,7 +3,9 @@
 
 #include "GeographicLib/Geodesic.hpp"
 #include "ctrl_toolbox/DataStructs.h"
+#include <GeographicLib/LocalCartesian.hpp>
 #include <cmath>
+#include <exception>
 #include <libconfig.h++>
 
 namespace ctb {
@@ -13,8 +15,18 @@ namespace ctb {
  *
  * An utility templated functor to set a pram from ConfigFIle
  */
-template <typename A, typename B>
-void SetParam(B& confObj, A& param, std::string name)
+template <typename A>
+void SetParam(const libconfig::Setting& confObj, A& param, const std::string& name)
+{
+    try {
+        confObj.lookupValue(name, param);
+    } catch (const libconfig::SettingNotFoundException) {
+        std::cerr << "No " << name << " setting in configuration file." << std::endl;
+    }
+}
+
+template <typename A>
+void SetParam(const libconfig::Config& confObj, A& param, const std::string& name)
 {
     try {
         confObj.lookupValue(name, param);
@@ -28,8 +40,23 @@ void SetParam(B& confObj, A& param, std::string name)
  *
  * An utility templated functor to set a vector pram from ConfigFIle
  */
-template <typename A, typename B>
-void SetParamVector(B& confObj, A& param, std::string name)
+template <typename A>
+void SetParamVector(const libconfig::Setting& confObj, A& param, const std::string& name)
+{
+    try {
+        const libconfig::Setting& settings = confObj.lookup(name);
+        param.resize(settings.getLength());
+        for (int n = 0; n < settings.getLength(); n++) {
+
+            param(n) = settings[n];
+        }
+    } catch (const libconfig::SettingNotFoundException) {
+        std::cerr << "No " << name << " setting in configuration file." << std::endl;
+    }
+}
+
+template <typename A>
+void SetParamVector(const libconfig::Config& confObj, A& param, const std::string& name)
 {
     try {
         const libconfig::Setting& settings = confObj.lookup(name);
@@ -101,22 +128,34 @@ double Rad2Deg(double rad);
 Eigen::Vector2d LatLong2mCoeff(LatLong LatLong);
 
 template <class A>
-void Euclidian2MapPoint(A euclidianPoint, ctb::LatLong centroid, ctb::LatLong& mapPoint)
+void Cartesian2MapPoint(const A& cartesianPoint, const LatLong& centroid, LatLong& mapPoint)
 {
-    Eigen::Vector2d LatLonM = LatLong2mCoeff(centroid);
+    try {
+        const GeographicLib::Geocentric& earth = GeographicLib::Geocentric::WGS84();
 
-    mapPoint.latitude = centroid.latitude - euclidianPoint[1] / LatLonM[1];
-    mapPoint.longitude = centroid.longitude - euclidianPoint[0] / LatLonM[0];
+        GeographicLib::LocalCartesian proj(centroid.latitude, centroid.longitude, 0, earth);
+        {
+            double h;
+            proj.Reverse(cartesianPoint[0], cartesianPoint[1], 0.0, mapPoint.latitude, mapPoint.longitude, h);
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Caught exception: " << e.what() << "\n";
+    }
 }
 
 template <class A>
-void Map2EuclidianPoint(LatLong mapPoint, ctb::LatLong centroid, A euclidianPoint)
+void Map2CartesianPoint(const LatLong& mapPoint, const LatLong& centroid, A& cartesianPoint)
 {
-    Eigen::Vector2d LatLonM = ctb::LatLong2mCoeff(centroid);
+    try {
+        const GeographicLib::Geocentric& earth = GeographicLib::Geocentric::WGS84();
 
-    euclidianPoint[0] = (mapPoint.latitude - centroid.latitude) * LatLonM[1];
-    euclidianPoint[1] = (mapPoint.longitude - centroid.longitude) * LatLonM[0];
-    euclidianPoint[2] = 0;
+        GeographicLib::LocalCartesian proj(centroid.latitude, centroid.longitude, 0, earth);
+        {
+            proj.Forward(mapPoint.latitude, mapPoint.longitude, 0, cartesianPoint[0], cartesianPoint[1], cartesianPoint[2]);
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Caught exception: " << e.what() << "\n";
+    }
 }
 }
 
