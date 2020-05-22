@@ -23,8 +23,13 @@ struct LatLong {
         , longitude(0.0)
     {
     }
-};
 
+    LatLong(double lat, double lon)
+        : latitude(lat)
+        , longitude(lon)
+    {
+    }
+};
 }
 
 #endif // CTRL_TOOLBOX_DATASTRUCTS_H

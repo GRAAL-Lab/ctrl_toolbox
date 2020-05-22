@@ -136,7 +136,7 @@ void Cartesian2MapPoint(const A& cartesianPoint, const LatLong& centroid, LatLon
         GeographicLib::LocalCartesian proj(centroid.latitude, centroid.longitude, 0, earth);
         {
             double h;
-            proj.Reverse(cartesianPoint[0], cartesianPoint[1], 0.0, mapPoint.latitude, mapPoint.longitude, h);
+            proj.Reverse(cartesianPoint[0], cartesianPoint[1], cartesianPoint[2], mapPoint.latitude, mapPoint.longitude, h);
         }
     } catch (const std::exception& e) {
         std::cerr << "Caught exception: " << e.what() << "\n";

@@ -25,7 +25,7 @@ add_library(ctrl_toolbox SHARED
     src/ExtendedKalmanFilter.cc
     src/MeasurmentKalmanFilter.cc
     src/ComputeTrajectory.cpp
-    src/LineOfSight.cpp
+#    src/LineOfSight.cpp
 )
 
 target_link_libraries(ctrl_toolbox rml Geographic)
