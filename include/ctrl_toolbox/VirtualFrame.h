@@ -8,24 +8,21 @@
 #ifndef VIRTUAL_FRAME_H_
 #define VIRTUAL_FRAME_H_
 
-#include "ctrl_toolbox/ComputeTrajectory.h"
+#include <ctrl_toolbox/HelperFunctions.h>
+#include <libconfig.h++>
 #include <rml/RML.h>
 namespace ctb {
 
-/**
+/*
  * @brief A simple virtual frame for smooth control
  *
- * The virtual frame is a simple concept: instead of feeding a new goal position <g> directly to the  frame <s> of
- * the robot
- * a virtual frame is used to avoid discontinuities. The virtual frame is set initially coincident with the  frame
- * <s>, then
- * an integration process brings the virtual frame towards the goal frame. This virtual frame is then fed as "goal" to
- * the  frame
- * which does not see any jumps in the goal position because they are filtered by the virtual frame.
- *
+ * The virtual frame is a simple concept: instead of feeding a new goal position <g> directly to the control frame <c> of
+ * the robot a virtual frame is used to avoid discontinuities. The virtual frame is set initially coincident with the frame
+ * <c>, then an integration process brings the virtual frame towards the goal frame. This virtual frame is then fed as "goal" to
+ * the  frame which does not see any jumps in the goal position because they are filtered by the virtual frame.
  * A mechanism is implemented to avoid that the virtual frame "runs away" too much from the  frame.
  */
-class VirtualFrame : public ComputeTrajectory {
+class VirtualFrame {
 
 public:
     enum VFType {
@@ -33,14 +30,15 @@ public:
         Angular,
         Linear
     };
+
     /*
     * @brief Default constructor
     */
-    VirtualFrame(VFType vft = FullPose, ComputeTrajectoryProjector vfprojector = Default);
+    VirtualFrame();
     /*
      * @brief Default desconstructor
      */
-    ~VirtualFrame() override {}
+    ~VirtualFrame();
     /*
      * @brief Reset the virtual frame
      * Simply sets the virtual frame to the identity matrix and the error to zero
@@ -51,7 +49,7 @@ public:
      * Sets the virtual frame to be the same as the given value
      * @param[in] worldF_T_virtualF the transformation matrix of the virtual frame w.r.t. the world frame
      */
-    void ResetState(const Eigen::TransfMatrix worldF_T_virtualF) override;
+    void ResetState(const Eigen::TransfMatrix worldF_T_virtualF);
     /*
      * @brief Compute the new virtual frame position
      * The method updates the position of the virtual frame \<v\> on the basis of the goal frame <g>
@@ -60,7 +58,7 @@ public:
      * @param[in] worldF_T_goalF the current goal frame position
      * @param[out] worldF_T_virtualF the new virtual frame position
      */
-    void Compute(const Eigen::TransfMatrix& worldF_T_startF, const Eigen::TransfMatrix worldF_T_goalF, Eigen::TransfMatrix& worldF_T_virtualF) override;
+    void Compute(const Eigen::TransfMatrix& worldF_T_startF, const Eigen::TransfMatrix worldF_T_goalF, Eigen::TransfMatrix& worldF_T_virtualF);
     /*
      * @brief Compute the new virtual frame position
      * The method updates the position of the virtual frame <v> on the basis of the requested Cartesian velocity xdotbar
@@ -69,26 +67,69 @@ public:
      * @param[in] xdotbar the requested Cartesian velocity
      * @param[out] world_T_virtual the new virtual frame position
      */
-    void Compute(const Eigen::TransfMatrix& worldF_T_startF, const Eigen::Vector6d& xdotbar, Eigen::TransfMatrix& world_T_virtual);
-    /*
-     * @brief Set ErrorNorm mode
-     */
-    auto UseErrorNorm() -> bool { return useErrorNorm_; }
+    void Compute(const Eigen::TransfMatrix& worldF_T_controlF, const Eigen::Vector6d& xdotbar, Eigen::TransfMatrix& world_T_virtual);
     /*
      * @brief Method getting the error between the goal and the virtual frame
      */
-    auto VirtualFrameToGoalError() const -> const Eigen::Vector6d& { return virtualFrameToGoalError_; }
+    auto VirtualFrameToGoalError() const -> const Eigen::Vector6d& { return virtualFrameToGoalFrameError_; }
     /*
      * @brief Method getting the error between the virtual frame and the <e>
      */
-    auto StartFrameToVirtualFrameError() const -> const Eigen::Vector6d& { return startFrameToVirtualFrameError_; }
+    auto ControlFrameToVirtualFrameError() const -> const Eigen::Vector6d& { return controlFrameToVirtualFrameError_; }
+    /**
+     * @brief Method setting the projector rotation matrix, the normal to the plane must coincide with the z axis, the
+     * transformation
+     * matrix must be expressed wrt to the inertial frame.
+     * @param worldF_R_projectionF rotation matrix in between the world and the projector frame
+     */
+    auto ProjectorFrame() -> Eigen::RotMatrix& { return worldF_R_projectionF_; }
+    /*
+     * @brief Method getting the track error
+     */
+    auto TrackError() -> Eigen::Vector3d& { return errorTrack_; }
+    /*
+     * @brief Method getting the cross track error
+     */
+    auto CrossTrackError() -> Eigen::Vector3d& { return errorCrossTrack_; }
+    /*
+     * Struc with all the param that needs to use VirtualFrame class
+     */
+    struct VirtualFrameParams {
+        double sampleTime;
+        Eigen::Vector2d gain;
+        Eigen::Vector2d onTrackAllowedDistance;
+        Eigen::Vector2d crossTrackAllowedDistance;
+        VFType vfType;
+
+        void ConfigureFromFile(const libconfig::Config& confObj, const std::string& taskName)
+        {
+            const libconfig::Setting& root = confObj.getRoot();
+            const libconfig::Setting& states = root["tasks"];
+
+            const libconfig::Setting& state = states.lookup(taskName);
+            ctb::SetParam(state, sampleTime, "sampleTime");
+            ctb::SetParamVector(state, gain, "virtualFrameGain");
+            ctb::SetParamVector(state, onTrackAllowedDistance, "onTrackAllowedDistance");
+            ctb::SetParamVector(state, crossTrackAllowedDistance, "crossTrackAllowedDistance");
+            int tmp;
+            ctb::SetParam(state, tmp, "virtualFrameType");
+            vfType = static_cast<VFType>(tmp);
+        }
+    } virtualFrameParams;
+
+    bool projectedOnPlane;
 
 private:
-    Eigen::Vector6d startFrameToVirtualFrameError_;
-    Eigen::Vector6d virtualFrameToGoalError_;
+    Eigen::Vector6d controlFrameToVirtualFrameError_;
+    Eigen::Vector6d virtualFrameToGoalFrameError_;
     Eigen::Vector6d virtualFrameVelocity_;
-    VFType vftype_;
-    bool useErrorNorm_;
+    Eigen::Vector3d errorTrack_;
+    Eigen::Vector3d errorCrossTrack_;
+    Eigen::TransfMatrix worldF_T_virtualF_;
+    Eigen::TransfMatrix worldF_T_goalF_;
+    Eigen::TransfMatrix worldF_T_virtualFInit_;
+    Eigen::RotMatrix worldF_R_projectionF_;
+    Eigen::TransfMatrix worldF_T_goalFCurrent_;
 };
 }
 
