@@ -48,11 +48,11 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& worldF_T_startF, const Eig
     if (projectedOnPlane) {
         Eigen::Vector3d worldF_planeDir = worldF_R_projectionF_.col(2);
         Eigen::Matrix3d P = (Eigen::Matrix3d::Identity() - worldF_planeDir * worldF_planeDir.transpose());
-        virtualFrameToGoalFrameError_.SetSecondVect3(P * virtualFrameToGoalFrameError_.GetSecondVect3());
-        virtualFrameToGoalFrameError_.SetFirstVect3(P * virtualFrameToGoalFrameError_.GetFirstVect3());
+        virtualFrameToGoalFrameError_.LinearVector(P * virtualFrameToGoalFrameError_.LinearVector());
+        virtualFrameToGoalFrameError_.AngularVector(P * virtualFrameToGoalFrameError_.AngularVector());
     }
 
-    virtualFrameVelocity_ = { virtualFrameToGoalFrameError_.GetFirstVect3() * virtualFrameParams.gain[0], virtualFrameToGoalFrameError_.GetSecondVect3() * virtualFrameParams.gain[1] };
+    virtualFrameVelocity_ = { virtualFrameToGoalFrameError_.LinearVector() * virtualFrameParams.gain[0], virtualFrameToGoalFrameError_.AngularVector() * virtualFrameParams.gain[1] };
 
     Compute(worldF_T_startF, virtualFrameVelocity_, worldF_T_virtualF);
 }
@@ -64,17 +64,17 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& worldF_T_controlF, const E
     if (projectedOnPlane) {
         Eigen::Vector3d projectorVector_worldFrame = worldF_R_projectionF_.col(2);
         Eigen::Matrix3d P = (Eigen::Matrix3d::Identity() - projectorVector_worldFrame * projectorVector_worldFrame.transpose());
-        controlFrameToVirtualFrameError_.SetSecondVect3(P * controlFrameToVirtualFrameError_.GetSecondVect3());
-        controlFrameToVirtualFrameError_.SetFirstVect3(P * controlFrameToVirtualFrameError_.GetFirstVect3());
+        controlFrameToVirtualFrameError_.LinearVector(P * controlFrameToVirtualFrameError_.LinearVector());
+        controlFrameToVirtualFrameError_.AngularVector(P * controlFrameToVirtualFrameError_.AngularVector());
     }
 
     bool outOfReach = false;
     Eigen::Vector3d errorLinear, xdotbarLinear;
 
     if (virtualFrameParams.vfType != FullPose) {
-        errorLinear = controlFrameToVirtualFrameError_.GetSecondVect3();
-        xdotbarLinear = xdotbar.GetSecondVect3();
-        Eigen::Vector3d n_vg = (worldF_T_goalF_.GetTransl() - worldF_T_virtualF_.GetTransl()).normalized();
+        errorLinear = controlFrameToVirtualFrameError_.LinearVector();
+        xdotbarLinear = xdotbar.LinearVector();
+        Eigen::Vector3d n_vg = (worldF_T_goalF_.Transl() - worldF_T_virtualF_.Transl()).normalized();
         errorTrack_ = (n_vg * n_vg.transpose()) * errorLinear;
         errorCrossTrack_ = (Eigen::Matrix3d::Identity() - n_vg * n_vg.transpose()) * errorLinear;
         if ((errorLinear + xdotbarLinear * virtualFrameParams.sampleTime).norm() > errorLinear.norm()) {
@@ -84,7 +84,7 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& worldF_T_controlF, const E
             double sigmaTrack = rml::DecreasingBellShapedFunction(virtualFrameParams.onTrackAllowedDistance(0), virtualFrameParams.onTrackAllowedDistance(1), 0, 1, errorTrack_.norm());
             double sigmaCross = rml::DecreasingBellShapedFunction(virtualFrameParams.crossTrackAllowedDistance(0), virtualFrameParams.crossTrackAllowedDistance(1), 0, 1, errorCrossTrack_.norm());
             sigma = std::min(sigmaTrack, sigmaCross);
-            virtualFrameVelocity_.SetSecondVect3(xdotbarLinear * sigma);
+            virtualFrameVelocity_.LinearVector(xdotbarLinear * sigma);
         }
     }
     if (!outOfReach) {

@@ -16,7 +16,7 @@ namespace ctb {
  * An utility templated functor to set a pram from ConfigFIle
  */
 template <typename A>
-void SetParam(const libconfig::Setting& confObj, A& param, const std::string& name)
+void SetParam(const libconfig::Setting& confObj, A& param, const std::string& name) noexcept(false)
 {
     try {
         confObj.lookupValue(name, param);
