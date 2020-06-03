@@ -49,7 +49,7 @@ public:
      * Sets the virtual frame to be the same as the given value
      * @param[in] worldF_T_virtualF the transformation matrix of the virtual frame w.r.t. the world frame
      */
-    void ResetState(const Eigen::TransfMatrix worldF_T_virtualF);
+    void ResetState(const Eigen::TransformationMatrix worldF_T_virtualF);
     /*
      * @brief Compute the new virtual frame position
      * The method updates the position of the virtual frame \<v\> on the basis of the goal frame <g>
@@ -58,7 +58,7 @@ public:
      * @param[in] worldF_T_goalF the current goal frame position
      * @param[out] worldF_T_virtualF the new virtual frame position
      */
-    void Compute(const Eigen::TransfMatrix& worldF_T_startF, const Eigen::TransfMatrix worldF_T_goalF, Eigen::TransfMatrix& worldF_T_virtualF);
+    void Compute(const Eigen::TransformationMatrix& worldF_T_startF, const Eigen::TransformationMatrix worldF_T_goalF, Eigen::TransformationMatrix& worldF_T_virtualF);
     /*
      * @brief Compute the new virtual frame position
      * The method updates the position of the virtual frame <v> on the basis of the requested Cartesian velocity xdotbar
@@ -67,7 +67,7 @@ public:
      * @param[in] xdotbar the requested Cartesian velocity
      * @param[out] world_T_virtual the new virtual frame position
      */
-    void Compute(const Eigen::TransfMatrix& worldF_T_controlF, const Eigen::Vector6d& xdotbar, Eigen::TransfMatrix& world_T_virtual);
+    void Compute(const Eigen::TransformationMatrix& worldF_T_controlF, const Eigen::Vector6d& xdotbar, Eigen::TransformationMatrix& world_T_virtual);
     /*
      * @brief Method getting the error between the goal and the virtual frame
      */
@@ -82,7 +82,7 @@ public:
      * matrix must be expressed wrt to the inertial frame.
      * @param worldF_R_projectionF rotation matrix in between the world and the projector frame
      */
-    auto ProjectorFrame() -> Eigen::RotMatrix& { return worldF_R_projectionF_; }
+    auto ProjectorFrame() -> Eigen::RotationMatrix& { return worldF_R_projectionF_; }
     /*
      * @brief Method getting the track error
      */
@@ -125,11 +125,11 @@ private:
     Eigen::Vector6d virtualFrameVelocity_;
     Eigen::Vector3d errorTrack_;
     Eigen::Vector3d errorCrossTrack_;
-    Eigen::TransfMatrix worldF_T_virtualF_;
-    Eigen::TransfMatrix worldF_T_goalF_;
-    Eigen::TransfMatrix worldF_T_virtualFInit_;
-    Eigen::RotMatrix worldF_R_projectionF_;
-    Eigen::TransfMatrix worldF_T_goalFCurrent_;
+    Eigen::TransformationMatrix worldF_T_virtualF_;
+    Eigen::TransformationMatrix worldF_T_goalF_;
+    Eigen::TransformationMatrix worldF_T_virtualFInit_;
+    Eigen::RotationMatrix worldF_R_projectionF_;
+    Eigen::TransformationMatrix worldF_T_goalFCurrent_;
 };
 }
 

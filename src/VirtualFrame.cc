@@ -28,14 +28,14 @@ void VirtualFrame::ResetState()
     controlFrameToVirtualFrameError_.setZero();
 }
 
-void VirtualFrame::ResetState(const Eigen::TransfMatrix worldF_T_virtualF)
+void VirtualFrame::ResetState(const Eigen::TransformationMatrix worldF_T_virtualF)
 {
     worldF_T_virtualF_ = std::move(worldF_T_virtualF);
     worldF_T_virtualFInit_ = std::move(worldF_T_virtualF);
     controlFrameToVirtualFrameError_.setZero();
 }
 
-void VirtualFrame::Compute(const Eigen::TransfMatrix& worldF_T_startF, const Eigen::TransfMatrix worldF_T_goalF, Eigen::TransfMatrix& worldF_T_virtualF)
+void VirtualFrame::Compute(const Eigen::TransformationMatrix& worldF_T_startF, const Eigen::TransformationMatrix worldF_T_goalF, Eigen::TransformationMatrix& worldF_T_virtualF)
 {
     worldF_T_goalF_ = std::move(worldF_T_goalF);
 
@@ -57,7 +57,7 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& worldF_T_startF, const Eig
     Compute(worldF_T_startF, virtualFrameVelocity_, worldF_T_virtualF);
 }
 
-void VirtualFrame::Compute(const Eigen::TransfMatrix& worldF_T_controlF, const Eigen::Vector6d& xdotbar, Eigen::TransfMatrix& world_T_virtual)
+void VirtualFrame::Compute(const Eigen::TransformationMatrix& worldF_T_controlF, const Eigen::Vector6d& xdotbar, Eigen::TransformationMatrix& world_T_virtual)
 {
     controlFrameToVirtualFrameError_ = rml::CartesianError(worldF_T_controlF, world_T_virtual);
 
@@ -74,7 +74,7 @@ void VirtualFrame::Compute(const Eigen::TransfMatrix& worldF_T_controlF, const E
     if (virtualFrameParams.vfType != FullPose) {
         errorLinear = controlFrameToVirtualFrameError_.LinearVector();
         xdotbarLinear = xdotbar.LinearVector();
-        Eigen::Vector3d n_vg = (worldF_T_goalF_.Transl() - worldF_T_virtualF_.Transl()).normalized();
+        Eigen::Vector3d n_vg = (worldF_T_goalF_.TranslationVector() - worldF_T_virtualF_.TranslationVector()).normalized();
         errorTrack_ = (n_vg * n_vg.transpose()) * errorLinear;
         errorCrossTrack_ = (Eigen::Matrix3d::Identity() - n_vg * n_vg.transpose()) * errorLinear;
         if ((errorLinear + xdotbarLinear * virtualFrameParams.sampleTime).norm() > errorLinear.norm()) {
