@@ -6,57 +6,58 @@
 #include <eigen3/Eigen/Dense>
 #include <iostream>
 #include <memory>
-#include <vector>
 #include <rml/RML.h>
+#include <vector>
 
 namespace ctb {
 
 class ExtendedKalmanFilter {
 public:
-    // F, note that f must depend on the state and the input and the dimension of the state, the indexAngles indicates
-    // which
+    // F, note that f must depend on the state and the input and the dimension of the state, the indexAngles indicates which
     // entries of the state are angles to be wrapped;
-    ExtendedKalmanFilter(
-        int stateDimension, std::vector<int> indexAngles, std::shared_ptr<ModelKalmanFilter> kalmanFilterModel);
+    ExtendedKalmanFilter(int stateDimension, std::vector<int> indexAngles, std::shared_ptr<ModelKalmanFilter> kalmanFilterModel);
 
     // Method that postpone to H the matrix output of the function, note that h is function of the stateitself
-    void AddMeasurment(std::shared_ptr<MeasurmentKalmanFilter> h);
+    void AddMeasurement(std::shared_ptr<MeasurementKalmanFilter> measurement);
 
-    void Predict(Eigen::VectorXd u);
+    void Prediction(const Eigen::VectorXd& u);
 
-    void ApplyMeasurements();
+    void Update();
 
     void Reset();
 
-    void Init(const Eigen::VectorXd initialState, const Eigen::MatrixXd sigma);
+    void Init(const Eigen::VectorXd initialState, const Eigen::MatrixXd P);
 
     Eigen::VectorXd GetState();
 
-
 private:
-
-    void NormalizeAngle(double& angle);
-    Eigen::VectorXd FilterAngularJump(const Eigen::VectorXd primaryHeading, const Eigen::VectorXd otherHeading);
-
-    Eigen::MatrixXd F_; //state matrix
-    Eigen::MatrixXd G_; // measurment matrix
-    Eigen::MatrixXd K_; // kalman gain
+    //state
     Eigen::VectorXd x_; // state
-    Eigen::VectorXd y_; // measurements
-    Eigen::VectorXd ypredict_; //predictedMeasure
+    Eigen::MatrixXd F_; //state transition Jacobian
+    Eigen::MatrixXd Q_; // process covariance (gaussian noise with zero mean)
+    Eigen::MatrixXd R_; // observation(or measure) covariance (gaussian noise with zero mean)
 
-    Eigen::MatrixXd S_; // measure estimate covariance
-    Eigen::MatrixXd Sigma_; // state estimate covariance
-    Eigen::MatrixXd Q_; // system noise covariance (error in modelling)
-    Eigen::MatrixXd R_; // measurement covariance (error in the modelling of G)
+    //measure
+    Eigen::VectorXd z_; // measurements
+    Eigen::MatrixXd H_; // observation matrix
 
+    //input
+    Eigen::VectorXd u_;
 
-    std::chrono::time_point<std::chrono::milliseconds> lastEstimateTime_;
+    //Kalman notation
+    Eigen::MatrixXd K_; // kalman gain
+
+    Eigen::VectorXd predicted_z_; //observation prediction
+    Eigen::MatrixXd S_; // Innovation (or residual) covariance
+
+    Eigen::MatrixXd P_; // Predicted covariance estimate
+
+    std::chrono::time_point<std::chrono::milliseconds> lastEstimationTime_;
     double speed_;
     int stateDimension_;
     std::shared_ptr<ModelKalmanFilter> kalmanFilterModel_;
     std::vector<int> indexAngles_;
-    Eigen::VectorXd u_;
+
     bool isFirst_;
     rml::RegularizationData regularizationParameter_;
 };

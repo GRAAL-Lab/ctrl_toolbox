@@ -4,17 +4,22 @@
 #include <eigen3/Eigen/Dense>
 
 namespace ctb {
-class MeasurmentKalmanFilter {
+class MeasurementKalmanFilter {
 public:
-    MeasurmentKalmanFilter(bool isAngleMeasure);
-    virtual ~MeasurmentKalmanFilter();
-    virtual Eigen::MatrixXd ComputeG(const Eigen::VectorXd state, const Eigen::VectorXd input) = 0;
-    Eigen::VectorXd GetMeasure();
-    virtual Eigen::VectorXd GetPredictedMeasure(const Eigen::VectorXd state) = 0 ;
-    void SetMeasure(const Eigen::VectorXd measure);
-    void SetCovariance(const Eigen::MatrixXd);
-    Eigen::MatrixXd GetCovarianceMesure() ;
-    bool IsAngleMeasure();
+    MeasurementKalmanFilter(bool isAngleMeasure);
+
+    virtual ~MeasurementKalmanFilter();
+
+    virtual Eigen::MatrixXd ComputeJacobian(const Eigen::VectorXd state, const Eigen::VectorXd input) = 0; // H = der(h)/der(x)
+
+    auto MeasureVector() const -> const Eigen::VectorXd& { return measure_; }
+
+    virtual Eigen::VectorXd ComputeObservationModel(const Eigen::VectorXd state) = 0;
+
+    auto Covariance() const -> const Eigen::MatrixXd& { return covariance_; }
+    auto Covariance() -> Eigen::MatrixXd& { return covariance_; }
+
+    auto IsAngleMeasure() const -> bool { return isAngleMeasure_; }
 
 private:
     Eigen::VectorXd measure_;

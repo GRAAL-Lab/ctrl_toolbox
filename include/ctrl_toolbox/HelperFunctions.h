@@ -26,7 +26,7 @@ void SetParam(const libconfig::Setting& confObj, A& param, const std::string& na
 }
 
 template <typename A>
-void SetParam(const libconfig::Config& confObj, A& param, const std::string& name)
+void SetParam(const libconfig::Config& confObj, A& param, const std::string& name) noexcept(false)
 {
     try {
         confObj.lookupValue(name, param);
@@ -41,7 +41,7 @@ void SetParam(const libconfig::Config& confObj, A& param, const std::string& nam
  * An utility templated functor to set a vector pram from ConfigFIle
  */
 template <typename A>
-void SetParamVector(const libconfig::Setting& confObj, A& param, const std::string& name)
+void SetParamVector(const libconfig::Setting& confObj, A& param, const std::string& name) noexcept(false)
 {
     try {
         const libconfig::Setting& settings = confObj.lookup(name);
@@ -56,7 +56,7 @@ void SetParamVector(const libconfig::Setting& confObj, A& param, const std::stri
 }
 
 template <typename A>
-void SetParamVector(const libconfig::Config& confObj, A& param, const std::string& name)
+void SetParamVector(const libconfig::Config& confObj, A& param, const std::string& name) noexcept(false)
 {
     try {
         const libconfig::Setting& settings = confObj.lookup(name);
@@ -125,8 +125,6 @@ double Deg2Rad(double deg);
  */
 double Rad2Deg(double rad);
 
-Eigen::Vector2d LatLong2mCoeff(LatLong LatLong);
-
 template <class A>
 void Cartesian2MapPoint(const A& cartesianPoint, const LatLong& centroid, LatLong& mapPoint)
 {
@@ -157,6 +155,10 @@ void Map2CartesianPoint(const LatLong& mapPoint, const LatLong& centroid, A& car
         std::cerr << "Caught exception: " << e.what() << "\n";
     }
 }
+
+void NormalizeAngle(double& angle);
+
+Eigen::VectorXd FilterAngularJump(const Eigen::VectorXd primaryHeading, const Eigen::VectorXd otherHeading);
 }
 
 #endif // CTRL_TOOLBOX_HELPERFUNCTIONS_H
