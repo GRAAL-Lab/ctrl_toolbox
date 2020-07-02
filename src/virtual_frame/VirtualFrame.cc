@@ -5,7 +5,7 @@
  *      Author: enrico
  */
 
-#include "VirtualFrame.h"
+#include "virtual_frame/VirtualFrame.h"
 
 namespace ctb {
 

@@ -1,4 +1,4 @@
-#include "ExtendedKalmanFilter.h"
+#include "kalman_filter/ExtendedKalmanFilter.h"
 #include "HelperFunctions.h"
 #include <rml/RML.h>
 
@@ -28,7 +28,7 @@ void ExtendedKalmanFilter::AddMeasurement(std::shared_ptr<MeasurementKalmanFilte
     if (isFirst_) {
         H_ = measurement->ComputeJacobian(x_, u_);
         z_ = measurement->MeasureVector();
-        predicted_z_ = measurement->ComputeObservationModel(x_);
+        predicted_z_ = measurement->ComputePrediction(x_, u_);
 
         if (measurement->IsAngleMeasure()) {
             predicted_z_ = FilterAngularJump(z_, predicted_z_);
@@ -48,7 +48,7 @@ void ExtendedKalmanFilter::AddMeasurement(std::shared_ptr<MeasurementKalmanFilte
         H_ = rml::UnderJuxtapose(H_, measurement->ComputeJacobian(x_, u_));
 
         Eigen::VectorXd yTemp = measurement->MeasureVector();
-        Eigen::VectorXd ypredictTemp = measurement->ComputeObservationModel(x_);
+        Eigen::VectorXd ypredictTemp = measurement->ComputePrediction(x_, u_);
 
         if (measurement->IsAngleMeasure()) {
             ypredictTemp = FilterAngularJump(yTemp, ypredictTemp);
@@ -69,6 +69,7 @@ void ExtendedKalmanFilter::Prediction(const Eigen::VectorXd& u)
     u_ = u; //input
 
     F_ = kalmanFilterModel_->ComputeJacobian(x_, u_); //The state transition Jacobian
+
     Q_ = kalmanFilterModel_->Covariance(); //Covariance of the process
 
     x_ = kalmanFilterModel_->ComputeStateTransitionModel(x_, u_); //Predicted state estimate
@@ -86,10 +87,13 @@ void ExtendedKalmanFilter::Update()
 
         S_ = H_ * P_ * H_.transpose() + R_; //Innovation (or residual) covariance
 
+//        std::cout << "Kalman Gain: " << std::endl;
+//        std::cout << K_ << std::endl;
+
         K_ = P_ * H_.transpose() * rml::RegularizedPseudoInverse(S_, regularizationParameter_); // Near-optimal Kalman gain
 
         x_ = x_ + K_ * (z_ - predicted_z_); // Updated state estimate
-        P_ = P_ - K_ * S_ * K_.transpose(); // Updated covariance estimate
+        P_ = P_ - K_ * H_ * P_; // Updated covariance estimate
 
         isFirst_ = true;
     }
@@ -103,6 +107,4 @@ void ExtendedKalmanFilter::Init(const Eigen::VectorXd initialState, const Eigen:
     P_ = P;
     isFirst_ = true;
 }
-
-Eigen::VectorXd ExtendedKalmanFilter::GetState() { return x_; }
 }

@@ -9,8 +9,8 @@ public:
     ModelKalmanFilter();
     virtual ~ModelKalmanFilter();
 
-    virtual Eigen::VectorXd ComputeStateTransitionModel(const Eigen::VectorXd state, const Eigen::VectorXd input) = 0; //f(x,y)
-    virtual Eigen::MatrixXd ComputeJacobian(const Eigen::VectorXd state, const Eigen::VectorXd input) = 0; //F = der(f)/der(x)
+    virtual Eigen::VectorXd ComputeStateTransitionModel(const Eigen::VectorXd& state, const Eigen::VectorXd& input) = 0; //f(x,u)
+    virtual Eigen::MatrixXd ComputeJacobian(const Eigen::VectorXd& state, const Eigen::VectorXd& input) = 0; //F = der(f(x,u)/der(x)
 
     auto Covariance() const -> const Eigen::MatrixXd& { return covariance_; }
     auto Covariance() -> Eigen::MatrixXd& { return covariance_; }

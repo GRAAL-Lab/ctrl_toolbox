@@ -18,12 +18,12 @@ project(ctrl_toolbox VERSION 0.1 LANGUAGES CXX)
 option(BUILD_TESTS "Compile tests" OFF)
 
 add_library(ctrl_toolbox SHARED
-    src/DigitalPID.cc
-    src/VirtualFrame.cc
+    src/pid/DigitalPID.cc
+    src/virtual_frame/VirtualFrame.cc
     src/HelperFunctions.cc
-    src/ModelKalmanFilter.cc
-    src/ExtendedKalmanFilter.cc
-    src/MeasurmentKalmanFilter.cc
+    src/kalman_filter/ModelKalmanFilter.cc
+    src/kalman_filter/ExtendedKalmanFilter.cc
+    src/kalman_filter/MeasurementKalmanFilter.cc
 )
 
 target_link_libraries(ctrl_toolbox rml Geographic)

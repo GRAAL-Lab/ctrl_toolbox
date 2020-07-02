@@ -1,7 +1,7 @@
 #ifndef EXTENDED_KALMAN_FILTER_H_
 #define EXTENDED_KALMAN_FILTER__H_
 
-#include "MeasurmentKalmanFilter.h"
+#include "MeasurementKalmanFilter.h"
 #include "ModelKalmanFilter.h"
 #include <eigen3/Eigen/Dense>
 #include <iostream>
@@ -28,7 +28,9 @@ public:
 
     void Init(const Eigen::VectorXd initialState, const Eigen::MatrixXd P);
 
-    Eigen::VectorXd GetState();
+    auto StateVector() const -> const Eigen::VectorXd& { return x_; }
+
+    auto PropagationError() const -> const Eigen::MatrixXd& { return P_; }
 
 private:
     //state
