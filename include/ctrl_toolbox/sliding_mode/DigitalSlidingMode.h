@@ -11,78 +11,75 @@
 #include <functional>
 #include <iostream>
 #include <vector>
-#include <functional>
 #include <z3.h>
-#include <iostream>
 
 namespace ctb {
 
-    /**
+/**
     * @class DigitaSlidingMode
     *
     * @brief to compute the control algorithm starting by the states of NonLinearObserver
     *
     * T is a template structure of the system parameters
     */
-    template <class T>
-    class DigitalSlidingMode{
+template <class T>
+class DigitalSlidingMode {
 
-    public:
-        DigitalSlidingMode():initialized_(false){};
-        DigitalSlidingMode( std::vector<double> getAlphaBeta(const std::vector<double>,T ) ,
-                            double s(const double,const double, T ), T param,
-                            double sampleTime=0,unsigned short int n_state=2, double saturation=0);
+public:
+    DigitalSlidingMode()
+        : initialized_(false){};
+    DigitalSlidingMode(std::vector<double> getAlphaBeta(const std::vector<double>, T),
+        double s(const double, const double, T), T param,
+        double sampleTime = 0, unsigned short int n_state = 2, double saturation = 0);
 
-        ~DigitalSlidingMode();
+    ~DigitalSlidingMode();
 
-        void Initialize(double k,double sampleTime, unsigned short int n_state, double saturation=0);
+    void Initialize(double k, double sampleTime, unsigned short int n_state, double saturation = 0);
 
-        /**
+    /**
         * @brief Sets the control sampling time.
 	    */
-        void setSampleTime( double sampleTime) { sample_time_=sampleTime;};
+    void setSampleTime(double sampleTime) { sample_time_ = sampleTime; };
 
-        void setSaturation( double saturation) { saturation_=saturation;};
+    void setSaturation(double saturation) { saturation_ = saturation; };
 
-        /**
+    /**
 	    * @brief Main function: computes the control output.
 	    *
 	    * @param ref	Current reference
 	    * @param fbk	Current feedback
         * @return	    control output
 	    */
-        virtual double compute( double GetRef , double GetFbk);
+    virtual double compute(double GetRef, double GetFbk);
 
-        double GetRef() const {return ref_; };
+    double GetRef() const { return ref_; };
 
-        double GetFbk() const {return feedback_;};
+    double GetFbk() const { return feedback_; };
 
-        double GetOutput() const { return c_output_[0];};
+    double GetOutput() const { return c_output_[0]; };
 
-        void setState(const std::vector<double>& state){state_=state;};
+    void setState(const std::vector<double>& state) { state_ = state; };
 
-    protected:
-        T parameter_; //!< system parameter
-        double ref_;  //!< reference input
-        double feedback_; //!< feedback input
-        std::vector<double> c_output_; //!< control output
+protected:
+    T parameter_; //!< system parameter
+    double ref_; //!< reference input
+    double feedback_; //!< feedback input
+    std::vector<double> c_output_; //!< control output
 
-        double sample_time_;
-        double saturation_; //!< saturation of control output
-        bool initialized_; //!< the controller is initialized
-        std::vector<double> state_; //!< system state
+    double sample_time_;
+    double saturation_; //!< saturation of control output
+    bool initialized_; //!< the controller is initialized
+    std::vector<double> state_; //!< system state
 
-        double k_=1; //!< sliding mode parameter
+    double k_ = 1; //!< sliding mode parameter
 
-        //!< parametric function to compute the alpha(state) and beta(state) for the control law
-        std::function<const std::vector<double>(const std::vector<double>, T)> getAlphaBeta_;
-        //!< sliding surface
-        std::function<const double(const double,const double, T)> s_;
+    //!< parametric function to compute the alpha(state) and beta(state) for the control law
+    std::function<const std::vector<double>(const std::vector<double>, T)> getAlphaBeta_;
+    //!< sliding surface
+    std::function<const double(const double, const double, T)> s_;
+};
 
-
-    };
-
-    /**
+/**
     * @class DigitalSecOrdSlidingMode
     *
     * @brief Second order Sliding mode
@@ -91,34 +88,37 @@ namespace ctb {
     *
     * T is a template structure of the system parameters
     */
-    template <class T>
-    class DigitalSecOrdSlidingMode: public DigitalSlidingMode<T> {
+template <class T>
+class DigitalSecOrdSlidingMode : public DigitalSlidingMode<T> {
 
-    public:
-        DigitalSecOrdSlidingMode(){this->initialized_ = false;};
-        DigitalSecOrdSlidingMode( std::vector<double> getAlphaBeta(const std::vector<double>, T) ,
-        double s(const double,const double, T), T param,
-        double sampleTime=0,unsigned short int n_state=2, double saturation=0)
-        :DigitalSlidingMode<T>(getAlphaBeta,s,param,sampleTime,n_state,saturation){sliding_state_=0;};
+public:
+    DigitalSecOrdSlidingMode() { this->initialized_ = false; };
+    DigitalSecOrdSlidingMode(std::vector<double> getAlphaBeta(const std::vector<double>, T),
+        double s(const double, const double, T), T param,
+        double sampleTime = 0, unsigned short int n_state = 2, double saturation = 0)
+        : DigitalSlidingMode<T>(getAlphaBeta, s, param, sampleTime, n_state, saturation)
+    {
+        sliding_state_ = 0;
+    };
 
-        /**
+    /**
 	    * @brief Main function: computes the control output.
 	    *
 	    * @param ref	Current reference
 	    * @param fbk	Current feedback
 	    * @return	    control output
 	    */
-        double compute( double GetRef , double GetFbk);
-	void setState(const std::vector<double>& state, bool s_state=false){this->state_=state;
-if (s_state)sliding_state_=0;};
-
-
-    private:
-        double sliding_state_; //!< sliding state
-
+    double compute(double GetRef, double GetFbk);
+    void setState(const std::vector<double>& state, bool s_state = false)
+    {
+        this->state_ = state;
+        if (s_state)
+            sliding_state_ = 0;
     };
 
-
+private:
+    double sliding_state_; //!< sliding state
+};
 }
 
 #include "template_class/DigitalSlidingMode.tpp"

@@ -10,12 +10,12 @@ public:
 
     virtual ~MeasurementKalmanFilter();
 
-    virtual Eigen::MatrixXd ComputeJacobian(const Eigen::VectorXd& state, const Eigen::VectorXd& input) = 0; // H = der(h(x,u))/der(x)
+    virtual Eigen::MatrixXd ComputeJacobian(const Eigen::VectorXd& state) = 0; // H = der(h(x,u))/der(x)
 
     auto MeasureVector() const -> const Eigen::VectorXd& { return z_; }
     auto MeasureVector() -> Eigen::VectorXd& { return z_; }
 
-    virtual Eigen::VectorXd ComputePrediction(const Eigen::VectorXd& state, const Eigen::VectorXd& input) = 0;
+    virtual Eigen::VectorXd ComputePrediction(const Eigen::VectorXd& state) = 0;
 
     auto Covariance() const -> const Eigen::MatrixXd& { return covariance_; }
     auto Covariance() -> Eigen::MatrixXd& { return covariance_; }

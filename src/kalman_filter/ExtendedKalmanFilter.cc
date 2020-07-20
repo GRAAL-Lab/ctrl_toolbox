@@ -26,9 +26,9 @@ ExtendedKalmanFilter::ExtendedKalmanFilter(int stateDimension, std::vector<int> 
 void ExtendedKalmanFilter::AddMeasurement(std::shared_ptr<MeasurementKalmanFilter> measurement)
 {
     if (isFirst_) {
-        H_ = measurement->ComputeJacobian(x_, u_);
+        H_ = measurement->ComputeJacobian(x_);
         z_ = measurement->MeasureVector();
-        predicted_z_ = measurement->ComputePrediction(x_, u_);
+        predicted_z_ = measurement->ComputePrediction(x_);
 
         if (measurement->IsAngleMeasure()) {
             predicted_z_ = FilterAngularJump(z_, predicted_z_);
@@ -45,10 +45,10 @@ void ExtendedKalmanFilter::AddMeasurement(std::shared_ptr<MeasurementKalmanFilte
         Eigen::MatrixXd zero_new_covariance;
         zero_new_covariance.setZero(z_.size(), size_new_measure);
 
-        H_ = rml::UnderJuxtapose(H_, measurement->ComputeJacobian(x_, u_));
+        H_ = rml::UnderJuxtapose(H_, measurement->ComputeJacobian(x_));
 
         Eigen::VectorXd yTemp = measurement->MeasureVector();
-        Eigen::VectorXd ypredictTemp = measurement->ComputePrediction(x_, u_);
+        Eigen::VectorXd ypredictTemp = measurement->ComputePrediction(x_);
 
         if (measurement->IsAngleMeasure()) {
             ypredictTemp = FilterAngularJump(yTemp, ypredictTemp);
@@ -87,12 +87,14 @@ void ExtendedKalmanFilter::Update()
 
         S_ = H_ * P_ * H_.transpose() + R_; //Innovation (or residual) covariance
 
-//        std::cout << "Kalman Gain: " << std::endl;
-//        std::cout << K_ << std::endl;
-
         K_ = P_ * H_.transpose() * rml::RegularizedPseudoInverse(S_, regularizationParameter_); // Near-optimal Kalman gain
 
         x_ = x_ + K_ * (z_ - predicted_z_); // Updated state estimate
+
+        for (const auto i : indexAngles_) {
+            NormalizeAngle(x_(i));
+        }
+
         P_ = P_ - K_ * H_ * P_; // Updated covariance estimate
 
         isFirst_ = true;

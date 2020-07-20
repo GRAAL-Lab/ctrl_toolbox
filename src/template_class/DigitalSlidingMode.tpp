@@ -80,10 +80,26 @@ namespace ctb{
 
         // implementation of control law parametrized with
         // the sliding surface (s) and the control gain k
+
+        std::cout << "alfa_beta[0]" << alfa_beta[0] << std::endl;
+	std::cout << "alfa_beta[1]" << alfa_beta[1] << std::endl;
+
         double u = (sliding_state_/this->sample_time_ - alfa_beta[0])/alfa_beta[1];
 
+	std::cout << "u" << u << std::endl;
+
         auto s_comp=this->s_(GetRef,GetFbk, this->parameter_);
+	std::cout << "s_comp" << s_comp << std::endl;
+
         sliding_state_=sliding_state_+ (-this->k_*sliding_state_-s_comp)*this->sample_time_;
+
+	std::cout << "sliding state" << sliding_state_ << std::endl;
+	std::cout << "this->k_" << this->k_ << std::endl;
+	std::cout << "-this->k_*sliding_state_" << -this->k_*sliding_state_ << std::endl;
+
+	std::cout << "(-this->k_*sliding_state_-s_comp)*this->sample_time_" << (-this->k_*sliding_state_-s_comp)*this->sample_time_ << std::endl;
+
+
 
 
         if (this->saturation_ > 0)
