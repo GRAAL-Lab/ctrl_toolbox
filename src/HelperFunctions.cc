@@ -49,4 +49,46 @@ void DistanceAndAzimuthRad(const LatLong& from, const LatLong& to, double& dista
 
     azimuthrad = azimuthdeg * M_PI / 180.0;
 }
+
+double Deg2Rad(double deg)
+{
+    return (M_PI / 180.0) * deg;
+}
+
+double Rad2Deg(double rad)
+{
+    return (180.0 / M_PI) * rad;
+}
+
+void NormalizeAngle(double& angle)
+{
+    while (angle > M_PI) {
+        angle -= 2 * M_PI;
+    }
+
+    while (angle < -M_PI) {
+        angle += 2 * M_PI;
+    }
+}
+
+Eigen::VectorXd FilterAngularJump(const Eigen::VectorXd primaryHeading, const Eigen::VectorXd otherHeading)
+{
+    Eigen::VectorXd out;
+    out.resize(primaryHeading.size());
+    for (int i = 0; i < primaryHeading.size(); i++) {
+        double diff = primaryHeading(i) - otherHeading(i);
+
+        out(i) = otherHeading(i);
+
+        if (diff > M_PI)
+            out(i) += 2.0 * M_PI;
+        else {
+            if (diff < -M_PI) {
+                out(i) -= 2.0 * M_PI;
+            }
+        }
+    }
+
+    return out;
+}
 }

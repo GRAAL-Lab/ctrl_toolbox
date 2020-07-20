@@ -18,14 +18,12 @@ project(ctrl_toolbox VERSION 0.1 LANGUAGES CXX)
 option(BUILD_TESTS "Compile tests" OFF)
 
 add_library(ctrl_toolbox SHARED
-    src/DigitalPID.cc
-    src/VirtualFrame.cc
+    src/pid/DigitalPID.cc
+    src/virtual_frame/VirtualFrame.cc
     src/HelperFunctions.cc
-    src/ModelKalmanFilter.cc
-    src/ExtendedKalmanFilter.cc
-    src/MeasurmentKalmanFilter.cc
-    src/ComputeTrajectory.cpp
-    src/LineOfSight.cpp
+    src/kalman_filter/ModelKalmanFilter.cc
+    src/kalman_filter/ExtendedKalmanFilter.cc
+    src/kalman_filter/MeasurementKalmanFilter.cc
 )
 
 target_link_libraries(ctrl_toolbox rml Geographic)
@@ -37,6 +35,7 @@ set_target_properties(ctrl_toolbox PROPERTIES LINKER_LANGUAGE CXX)
 # paths.
 target_include_directories(ctrl_toolbox PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/template_class>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/ctrl_toolbox>
     $<INSTALL_INTERFACE:include>
     PRIVATE src)
@@ -61,6 +60,7 @@ install(TARGETS ctrl_toolbox EXPORT ctrl_toolboxConfig
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # This is for Windows
 install(DIRECTORY include/ctrl_toolbox DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY src/template_class DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # This makes the project importable from the install directory
 # Put config file in per-project dir (name MUST match), can also

@@ -7,7 +7,7 @@
 
 #include <cmath>
 
-#include "ctrl_toolbox/DigitalPID.h"
+#include "ctrl_toolbox/pid/DigitalPID.h"
 #include <iostream>
 
 namespace ctb {

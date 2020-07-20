@@ -36,6 +36,7 @@
 ehthumbs.db
 Thumbs.db
 
+build/
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm
 
 *.iml
@@ -96,7 +97,6 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
-build/
 develop-eggs/
 dist/
 downloads/
@@ -147,7 +147,6 @@ target/
 
 # R O S
 
-build/
 bin/
 lib/
 msg_gen/
