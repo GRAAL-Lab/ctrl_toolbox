@@ -22,7 +22,7 @@ public:
 
     void Prediction(const Eigen::VectorXd& u);
 
-    void Update();
+    void Update(const Eigen::VectorXd& u);
 
     void Reset();
 
@@ -36,15 +36,11 @@ private:
     //state
     Eigen::VectorXd x_; // state
     Eigen::MatrixXd F_; //state transition Jacobian
-    Eigen::MatrixXd Q_; // process covariance (gaussian noise with zero mean)
     Eigen::MatrixXd R_; // observation(or measure) covariance (gaussian noise with zero mean)
 
     //measure
     Eigen::VectorXd z_; // measurements
     Eigen::MatrixXd H_; // observation matrix
-
-    //input
-    Eigen::VectorXd u_;
 
     //Kalman notation
     Eigen::MatrixXd K_; // kalman gain
@@ -62,6 +58,8 @@ private:
 
     bool isFirst_;
     rml::RegularizationData regularizationParameter_;
+
+    std::vector<std::shared_ptr<MeasurementKalmanFilter>> measurements;
 };
 }
 #endif

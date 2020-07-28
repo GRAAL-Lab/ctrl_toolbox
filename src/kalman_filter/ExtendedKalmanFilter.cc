@@ -25,65 +25,60 @@ ExtendedKalmanFilter::ExtendedKalmanFilter(int stateDimension, std::vector<int> 
 // Method that postpone to H the matrix output of the function, note that h is function of the stateitself
 void ExtendedKalmanFilter::AddMeasurement(std::shared_ptr<MeasurementKalmanFilter> measurement)
 {
-    if (isFirst_) {
-        H_ = measurement->ComputeJacobian(x_);
-        z_ = measurement->MeasureVector();
-        predicted_z_ = measurement->ComputePrediction(x_);
-
-        if (measurement->IsAngleMeasure()) {
-            predicted_z_ = FilterAngularJump(z_, predicted_z_);
-        }
-        R_ = measurement->Covariance();
-        isFirst_ = false;
-    } else {
-
-        long int size_new_measure = measurement->MeasureVector().size();
-
-        Eigen::MatrixXd zero_previous_covariance;
-        zero_previous_covariance.setZero(size_new_measure, z_.size());
-
-        Eigen::MatrixXd zero_new_covariance;
-        zero_new_covariance.setZero(z_.size(), size_new_measure);
-
-        H_ = rml::UnderJuxtapose(H_, measurement->ComputeJacobian(x_));
-
-        Eigen::VectorXd yTemp = measurement->MeasureVector();
-        Eigen::VectorXd ypredictTemp = measurement->ComputePrediction(x_);
-
-        if (measurement->IsAngleMeasure()) {
-            ypredictTemp = FilterAngularJump(yTemp, ypredictTemp);
-        }
-
-        z_ = rml::UnderJuxtapose(z_, yTemp);
-
-        predicted_z_ = rml::UnderJuxtapose(predicted_z_, ypredictTemp);
-
-        R_ = rml::UnderJuxtapose(R_, zero_previous_covariance);
-        Eigen::MatrixXd R_temp = rml::UnderJuxtapose(zero_new_covariance, measurement->Covariance());
-        R_ = rml::RightJuxtapose(R_, R_temp);
-    }
+    measurements.push_back(measurement);
+    isFirst_ = false;
 }
 
-void ExtendedKalmanFilter::Prediction(const Eigen::VectorXd& u)
+void ExtendedKalmanFilter::Update(const Eigen::VectorXd& u)
 {
-    u_ = u; //input
+    //Prediction
+    F_ = kalmanFilterModel_->ComputeJacobian(x_, u); //The state transition Jacobian
 
-    F_ = kalmanFilterModel_->ComputeJacobian(x_, u_); //The state transition Jacobian
-
-    Q_ = kalmanFilterModel_->Covariance(); //Covariance of the process
-
-    x_ = kalmanFilterModel_->ComputeStateTransitionModel(x_, u_); //Predicted state estimate
+    x_ = kalmanFilterModel_->ComputeStateTransitionModel(x_, u); //Predicted state estimate
 
     for (const auto i : indexAngles_) {
         NormalizeAngle(x_(i));
     }
 
-    P_ = F_ * P_ * F_.transpose() + Q_; //Predicted covariance estimate
-}
+    P_ = F_ * P_ * F_.transpose() + kalmanFilterModel_->Covariance(); //Predicted covariance estimate
 
-void ExtendedKalmanFilter::Update()
-{
+    //Update
     if (!isFirst_) {
+
+        //Get the first measure vector
+        z_ = measurements.front()->MeasureVector();
+        //Compute the first prediction measurement
+        predicted_z_ = measurements.front()->ComputePrediction(x_);
+
+        //Filter to avoid angular jump
+        if (measurements.front()->IsAngleMeasure()) {
+            predicted_z_ = FilterAngularJump(z_, predicted_z_);
+        }
+
+        //Get the jacobian of the first measurements
+        H_ = measurements.front()->ComputeJacobian(x_);
+        //Get the covariance of the first measurements
+        R_ = measurements.front()->Covariance();
+
+        //Compute the measure vectors, predictions, jacobians and covariances by iteratively stack vectors and matrices
+        for (unsigned int i = 1; i < measurements.size(); i++) {
+
+            Eigen::VectorXd z_tmp = measurements.at(i)->MeasureVector();
+            z_ = rml::UnderJuxtapose(z_, z_tmp);
+
+            Eigen::VectorXd predicted_z_tmp = measurements.at(i)->ComputePrediction(x_);
+            if (measurements.at(i)->IsAngleMeasure()) {
+                predicted_z_tmp = FilterAngularJump(z_tmp, predicted_z_tmp);
+            }
+            predicted_z_ = rml::UnderJuxtapose(predicted_z_, predicted_z_tmp);
+
+            H_ = rml::UnderJuxtapose(H_, measurements.at(i)->ComputeJacobian(x_));
+
+            Eigen::VectorXd R_diag = R_.diagonal();
+            R_diag = rml::UnderJuxtapose(R_diag, measurements.at(i)->Covariance().diagonal());
+            R_ = Eigen::MatrixXd::Zero(R_diag.size(), R_diag.size());
+            R_.diagonal() = R_diag;
+        }
 
         S_ = H_ * P_ * H_.transpose() + R_; //Innovation (or residual) covariance
 
@@ -97,11 +92,18 @@ void ExtendedKalmanFilter::Update()
 
         P_ = P_ - K_ * H_ * P_; // Updated covariance estimate
 
+        measurements.clear();
         isFirst_ = true;
     }
 }
 
-void ExtendedKalmanFilter::Reset() {}
+void ExtendedKalmanFilter::Reset()
+{
+    x_.setZero(stateDimension_);
+    P_.setZero(stateDimension_, stateDimension_);
+    measurements.clear();
+    isFirst_ = true;
+}
 
 void ExtendedKalmanFilter::Init(const Eigen::VectorXd initialState, const Eigen::MatrixXd P)
 {
