@@ -126,15 +126,14 @@ double Deg2Rad(double deg);
 double Rad2Deg(double rad);
 
 template <class A>
-void Cartesian2MapPoint(const A& cartesianPoint, const LatLong& centroid, LatLong& mapPoint)
+void LocalUTM2LatLong(const A& cartesianPoint, const LatLong& centroid, LatLong& mapPoint, double& altitude)
 {
     try {
         const GeographicLib::Geocentric& earth = GeographicLib::Geocentric::WGS84();
 
         GeographicLib::LocalCartesian proj(centroid.latitude, centroid.longitude, 0, earth);
         {
-            double h;
-            proj.Reverse(cartesianPoint[0], cartesianPoint[1], cartesianPoint[2], mapPoint.latitude, mapPoint.longitude, h);
+            proj.Reverse(cartesianPoint[0], cartesianPoint[1], cartesianPoint[2], mapPoint.latitude, mapPoint.longitude, altitude);
         }
     } catch (const std::exception& e) {
         std::cerr << "Caught exception: " << e.what() << "\n";
@@ -142,14 +141,45 @@ void Cartesian2MapPoint(const A& cartesianPoint, const LatLong& centroid, LatLon
 }
 
 template <class A>
-void Map2CartesianPoint(const LatLong& mapPoint, const LatLong& centroid, A& cartesianPoint)
+void LatLong2LocalUTM(const LatLong& mapPoint, double altitude, const LatLong& centroid, A& cartesianPoint)
 {
     try {
         const GeographicLib::Geocentric& earth = GeographicLib::Geocentric::WGS84();
 
         GeographicLib::LocalCartesian proj(centroid.latitude, centroid.longitude, 0, earth);
         {
-            proj.Forward(mapPoint.latitude, mapPoint.longitude, 0, cartesianPoint[0], cartesianPoint[1], cartesianPoint[2]);
+            proj.Forward(mapPoint.latitude, mapPoint.longitude, altitude, cartesianPoint[0], cartesianPoint[1], cartesianPoint[2]);
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Caught exception: " << e.what() << "\n";
+    }
+}
+
+template <class A>
+void LocalNED2LatLong(const A& cartesianPoint, const LatLong& centroid, LatLong& mapPoint, double& altitude)
+{
+    try {
+        const GeographicLib::Geocentric& earth = GeographicLib::Geocentric::WGS84();
+
+        GeographicLib::LocalCartesian proj(centroid.latitude, centroid.longitude, 0, earth);
+        {
+            proj.Reverse(cartesianPoint[1], cartesianPoint[0], -cartesianPoint[2], mapPoint.latitude, mapPoint.longitude, altitude);
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Caught exception: " << e.what() << "\n";
+    }
+}
+
+template <class A>
+void LatLong2LocalNED(const LatLong& mapPoint, double altitude, const LatLong& centroid, A& cartesianPoint)
+{
+    try {
+        const GeographicLib::Geocentric& earth = GeographicLib::Geocentric::WGS84();
+
+        GeographicLib::LocalCartesian proj(centroid.latitude, centroid.longitude, 0, earth);
+        {
+            proj.Forward(mapPoint.latitude, mapPoint.longitude, altitude, cartesianPoint[1], cartesianPoint[0], cartesianPoint[2]);
+            cartesianPoint[2] = -cartesianPoint[2];
         }
     } catch (const std::exception& e) {
         std::cerr << "Caught exception: " << e.what() << "\n";
