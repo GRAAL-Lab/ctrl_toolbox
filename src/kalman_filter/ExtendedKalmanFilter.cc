@@ -8,9 +8,9 @@ namespace ctb {
 // which
 // entries of the state are angles to be wrapped;
 ExtendedKalmanFilter::ExtendedKalmanFilter(int stateDimension, std::vector<int> indexAngles, std::shared_ptr<ModelKalmanFilter> kalmanFilterModel)
-    : stateDimension_{ stateDimension }
-    , kalmanFilterModel_{ std::move(kalmanFilterModel) }
-    , indexAngles_{ std::move(indexAngles) }
+    : stateDimension_ { stateDimension }
+    , kalmanFilterModel_ { std::move(kalmanFilterModel) }
+    , indexAngles_ { std::move(indexAngles) }
 {
     x_.setZero(stateDimension_);
     P_.setZero(stateDimension_, stateDimension_);
@@ -47,6 +47,7 @@ void ExtendedKalmanFilter::Update(const Eigen::VectorXd& u)
 
         //Get the first measure vector
         z_ = measurements.front()->MeasureVector();
+
         //Compute the first prediction measurement
         predicted_z_ = measurements.front()->ComputePrediction(x_);
 
@@ -109,6 +110,12 @@ void ExtendedKalmanFilter::Init(const Eigen::VectorXd initialState, const Eigen:
 {
     x_ = initialState;
     P_ = P;
+    isFirst_ = true;
+}
+
+void ExtendedKalmanFilter::Init(const Eigen::VectorXd initialState)
+{
+    x_ = initialState;
     isFirst_ = true;
 }
 }

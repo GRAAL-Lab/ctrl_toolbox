@@ -28,6 +28,8 @@ public:
 
     void Init(const Eigen::VectorXd initialState, const Eigen::MatrixXd P);
 
+    void Init(const Eigen::VectorXd initialState);
+
     auto StateVector() const -> const Eigen::VectorXd& { return x_; }
 
     auto PropagationError() const -> const Eigen::MatrixXd& { return P_; }
