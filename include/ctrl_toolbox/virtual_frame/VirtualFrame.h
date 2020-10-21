@@ -107,12 +107,13 @@ public:
             const libconfig::Setting& states = root["tasks"];
 
             const libconfig::Setting& state = states.lookup(taskName);
-            ctb::SetParam(state, sampleTime, "sampleTime");
+            ctb::SetParam(state, sampleTime, "virtualFrameSampleTime");
             ctb::SetParamVector(state, gain, "virtualFrameGain");
             ctb::SetParamVector(state, onTrackAllowedDistance, "onTrackAllowedDistance");
             ctb::SetParamVector(state, crossTrackAllowedDistance, "crossTrackAllowedDistance");
             int tmp;
             ctb::SetParam(state, tmp, "virtualFrameType");
+
             vfType = static_cast<VFType>(tmp);
         }
     } virtualFrameParams;
