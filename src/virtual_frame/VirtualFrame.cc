@@ -35,9 +35,9 @@ void VirtualFrame::ResetState(const Eigen::TransformationMatrix worldF_T_virtual
     controlFrameToVirtualFrameError_.setZero();
 }
 
-void VirtualFrame::Compute(const Eigen::TransformationMatrix& worldF_T_startF, const Eigen::TransformationMatrix worldF_T_goalF, Eigen::TransformationMatrix& worldF_T_virtualF)
+void VirtualFrame::Compute(const Eigen::TransformationMatrix& worldF_T_startF, const Eigen::TransformationMatrix& worldF_T_goalF, Eigen::TransformationMatrix& worldF_T_virtualF)
 {
-    worldF_T_goalF_ = std::move(worldF_T_goalF);
+    worldF_T_goalF_ = worldF_T_goalF;
 
     if (virtualFrameParams.gain.norm() == 0.0 || virtualFrameParams.sampleTime == 0.0) {
         std::cerr << "WARNING: No virtualFrameGain and/or sampleTime set!!" << std::endl;

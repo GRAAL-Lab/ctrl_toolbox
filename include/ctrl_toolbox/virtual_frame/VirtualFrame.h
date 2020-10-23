@@ -58,7 +58,7 @@ public:
      * @param[in] worldF_T_goalF the current goal frame position
      * @param[out] worldF_T_virtualF the new virtual frame position
      */
-    void Compute(const Eigen::TransformationMatrix& worldF_T_startF, const Eigen::TransformationMatrix worldF_T_goalF, Eigen::TransformationMatrix& worldF_T_virtualF);
+    void Compute(const Eigen::TransformationMatrix& worldF_T_startF, const Eigen::TransformationMatrix &worldF_T_goalF, Eigen::TransformationMatrix& worldF_T_virtualF);
     /*
      * @brief Compute the new virtual frame position
      * The method updates the position of the virtual frame <v> on the basis of the requested Cartesian velocity xdotbar
@@ -101,20 +101,28 @@ public:
         Eigen::Vector2d crossTrackAllowedDistance;
         VFType vfType;
 
-        void ConfigureFromFile(const libconfig::Config& confObj, const std::string& taskName)
+        bool ConfigureFromFile(const libconfig::Config& confObj, const std::string& taskName)
         {
             const libconfig::Setting& root = confObj.getRoot();
             const libconfig::Setting& states = root["tasks"];
 
             const libconfig::Setting& state = states.lookup(taskName);
-            ctb::SetParam(state, sampleTime, "virtualFrameSampleTime");
-            ctb::SetParamVector(state, gain, "virtualFrameGain");
-            ctb::SetParamVector(state, onTrackAllowedDistance, "onTrackAllowedDistance");
-            ctb::SetParamVector(state, crossTrackAllowedDistance, "crossTrackAllowedDistance");
+
+            if (!ctb::SetParam(state, sampleTime, "virtualFrameSampleTime"))
+                return false;
+            if (!ctb::SetParamVector(state, gain, "virtualFrameGain"))
+                return false;
+            if (!ctb::SetParamVector(state, onTrackAllowedDistance, "onTrackAllowedDistance"))
+                return false;
+            if (!ctb::SetParamVector(state, crossTrackAllowedDistance, "crossTrackAllowedDistance"))
+                return false;
             int tmp;
-            ctb::SetParam(state, tmp, "virtualFrameType");
+            if (!ctb::SetParam(state, tmp, "virtualFrameType"))
+                return false;
 
             vfType = static_cast<VFType>(tmp);
+
+            return true;
         }
     } virtualFrameParams;
 
