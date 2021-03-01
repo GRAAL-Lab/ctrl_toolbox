@@ -78,12 +78,12 @@ bool SetParamVector(const libconfig::Config& confObj, A& param, const std::strin
 double clamp(double n, double lower, double upper);
 
 /**
- * @brief HeadingErrorRad
+ * @brief AngleDifference
  * @param from
  * @param to
  * @return
  */
-double HeadingErrorRad(double from, double to);
+double AngleDifference(double from, double to);
 
 /**
  * @brief DistanceAndAzimuthRad
@@ -108,10 +108,10 @@ struct DifferenceFunctor {
     }
 };
 
-struct HeadingErrorRadFunctor {
+struct AngleDifference {
     double operator()(double from, double to) const
     {
-        return HeadingErrorRad(from, to);
+        return AngleDifference(from, to);
     }
 };
 
