@@ -11,28 +11,13 @@ double clamp(double n, double lower, double upper)
 
 double HeadingErrorRad(double to, double from)
 {
-    //std::cout << " HeadingErrorRad(double from, double to)" << std::endl;
-    double oppositeHeading;
-    double diffHeading;
-
-    if (to < M_PI) {
-        oppositeHeading = to + M_PI;
-
-        if (from > oppositeHeading) {
-            diffHeading = to + 2.0 * M_PI - from;
-        } else {
-            diffHeading = to - from;
-        }
-    } else {
-        oppositeHeading = to - M_PI;
-
-        if (from < oppositeHeading) {
-            diffHeading = to - 2.0 * M_PI - from;
-        } else {
-            diffHeading = to - from;
-        }
-    }
-
+    double diffHeading = to - from;
+    
+    if (diffHeading > M_PI)
+        diffHeading -= 2*M_PI;
+    else if (diffHeading < -M_PI)
+        diffHeading += 2*M_PI;
+       
     return diffHeading;
 }
 
