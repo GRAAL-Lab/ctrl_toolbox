@@ -108,7 +108,7 @@ struct DifferenceFunctor {
     }
 };
 
-struct AngleDifference {
+struct AngleDifferenceFunctor {
     double operator()(double from, double to) const
     {
         return AngleDifference(from, to);
