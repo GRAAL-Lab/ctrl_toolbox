@@ -9,7 +9,7 @@ double clamp(double n, double lower, double upper)
     return std::max(lower, std::min(n, upper));
 }
 
-double HeadingErrorRad(double to, double from)
+double AngleDifference(double to, double from)
 {
     double diffHeading = to - from;
     
