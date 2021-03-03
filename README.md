@@ -4,11 +4,11 @@ This library is a collection of control tools such as PID and adaptive controlle
 ## Components
 The list of components is the following:
 
-1. PID Controller: ctb::DigitalPID
-2. Virtual Frame: ctb::VirtualFrame
+1. PID Controller: **ctb::DigitalPID**
+2. Virtual Frame: **ctb::VirtualFrame**
 
 ## Dependencies
 
 * RML: Robotic Mathematical Library (https://bitbucket.org/isme_robotics/rml/src)
-* Geographic Library (for Ubuntu: sudo apt-get install -y libgeographic-dev)
-* libconfig++-dev: sudo apt install libconfig++-dev
+* Geographic Library (for Ubuntu: `sudo apt-get install -y libgeographic-dev`)
+* LibConfig++: `sudo apt install libconfig++-dev`
