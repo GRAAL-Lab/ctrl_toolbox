@@ -108,16 +108,16 @@ public:
 
             const libconfig::Setting& state = states.lookup(taskName);
 
-            if (!ctb::SetParam(state, sampleTime, "virtualFrameSampleTime"))
+            if (!ctb::GetParam(state, sampleTime, "virtualFrameSampleTime"))
                 return false;
-            if (!ctb::SetParamVector(state, gain, "virtualFrameGain"))
+            if (!ctb::GetParamVector(state, gain, "virtualFrameGain"))
                 return false;
-            if (!ctb::SetParamVector(state, onTrackAllowedDistance, "onTrackAllowedDistance"))
+            if (!ctb::GetParamVector(state, onTrackAllowedDistance, "onTrackAllowedDistance"))
                 return false;
-            if (!ctb::SetParamVector(state, crossTrackAllowedDistance, "crossTrackAllowedDistance"))
+            if (!ctb::GetParamVector(state, crossTrackAllowedDistance, "crossTrackAllowedDistance"))
                 return false;
             int tmp;
-            if (!ctb::SetParam(state, tmp, "virtualFrameType"))
+            if (!ctb::GetParam(state, tmp, "virtualFrameType"))
                 return false;
 
             vfType = static_cast<VFType>(tmp);

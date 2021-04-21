@@ -16,19 +16,24 @@ namespace ctb {
  * An utility templated functor to set a pram from ConfigFIle
  */
 template <typename A>
-bool SetParam(const libconfig::Setting& confObj, A& param, const std::string& name) noexcept(false)
+bool GetParam(const libconfig::Setting& confObj, A& param, const std::string& name) noexcept(false)
 {
-    if (!confObj.lookupValue(name, param))
+    if (!confObj.lookupValue(name, param)){
+        std::cerr << "ctb::GetParam() Error: <" << name << "> lookup failed." << std::endl;
         return false;
+    }
+
 
     return true;
 }
 
 template <typename A>
-bool SetParam(const libconfig::Config& confObj, A& param, const std::string& name) noexcept(false)
+bool GetParam(const libconfig::Config& confObj, A& param, const std::string& name) noexcept(false)
 {
-    if (!confObj.lookupValue(name, param))
+    if (!confObj.lookupValue(name, param)){
+        std::cerr << "ctb::GetParam() Error: <" << name << "> lookup failed." << std::endl;
         return false;
+    }
 
     return true;
 }
@@ -39,7 +44,7 @@ bool SetParam(const libconfig::Config& confObj, A& param, const std::string& nam
  * An utility templated functor to set a vector pram from ConfigFIle
  */
 template <typename A>
-bool SetParamVector(const libconfig::Setting& confObj, A& param, const std::string& name) noexcept(false)
+bool GetParamVector(const libconfig::Setting& confObj, A& param, const std::string& name) noexcept(false)
 {
     try {
         const libconfig::Setting& settings = confObj.lookup(name);
@@ -49,14 +54,16 @@ bool SetParamVector(const libconfig::Setting& confObj, A& param, const std::stri
             param(n) = settings[n];
         }
     } catch (const libconfig::SettingNotFoundException) {
+        std::cerr << "ctb::GetParamVector() Error: <" << name << "> lookup failed." << std::endl;
         return false;
     }
+
 
     return true;
 }
 
 template <typename A>
-bool SetParamVector(const libconfig::Config& confObj, A& param, const std::string& name) noexcept(false)
+bool GetParamVector(const libconfig::Config& confObj, A& param, const std::string& name) noexcept(false)
 {
     try {
         const libconfig::Setting& settings = confObj.lookup(name);
@@ -66,8 +73,10 @@ bool SetParamVector(const libconfig::Config& confObj, A& param, const std::strin
             param(n) = settings[n];
         }
     } catch (const libconfig::SettingNotFoundException) {
+        std::cerr << "ctb::GetParamVector() Error: <" << name << "> lookup failed." << std::endl;
         return false;
     }
+
 
     return true;
 }
