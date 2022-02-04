@@ -29,6 +29,11 @@ struct LatLong {
         , longitude(lon)
     {
     }
+
+    friend std::ostream& operator<< (std::ostream& os, const LatLong& obj) {
+        return os
+            << "Lat, Long: (" << obj.latitude << ", " << obj.longitude << ")";
+    };
 };
 }
 
