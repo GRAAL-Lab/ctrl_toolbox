@@ -6,9 +6,10 @@ The list of components is the following:
 
 1. PID Controller: **ctb::DigitalPID**
 2. Virtual Frame: **ctb::VirtualFrame**
+3. Kalman Filter: **ctb::ExtendedKalmanFilter**
 
 ## Dependencies
 
-* RML: Robotic Mathematical Library (https://bitbucket.org/isme_robotics/rml/src)
-* Geographic Library (for Ubuntu: `sudo apt-get install -y libgeographic-dev`)
-* LibConfig++: `sudo apt install libconfig++-dev`
+* **rml**: Robotic Mathematical Library (https://bitbucket.org/isme_robotics/rml/src)
+* **Geographic Library**: `sudo apt-get install -y libgeographic-dev`)
+* **libconfig++**: `sudo apt install libconfig++-dev`
