@@ -2,8 +2,9 @@
 
 # At LEAST 2.8 but newer is better
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+project(ctrl_toolbox VERSION 1.0 LANGUAGES CXX)
 
-# Must use GNUInstallDirs to install libraries into correct
+# Must use GNUI stallDirs to install libraries into correct
 # locations on all platforms.
 include(GNUInstallDirs)
 
@@ -11,9 +12,6 @@ if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
 endif()
 
-
-# Define library. Only source files here!
-project(ctrl_toolbox VERSION 0.1 LANGUAGES CXX)
 
 option(BUILD_TESTS "Compile tests" OFF)
 
