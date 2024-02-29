@@ -7,6 +7,7 @@
 #include <cmath>
 #include <exception>
 #include <libconfig.h++>
+#include <ctrl_toolbox_internal/Futils.h>
 
 namespace ctb {
 
@@ -19,7 +20,7 @@ template <typename A>
 bool GetParam(const libconfig::Setting& confObj, A& param, const std::string& name) noexcept(false)
 {
     if (!confObj.lookupValue(name, param)){
-        std::cerr << "ctb::GetParam() Error: <" << name << "> lookup failed." << std::endl;
+        std::cerr << tc::redL << "ctb::GetParam() Error: <" << name << "> lookup failed." << tc::none << std::endl;
         return false;
     }
 
@@ -31,7 +32,7 @@ template <typename A>
 bool GetParam(const libconfig::Config& confObj, A& param, const std::string& name) noexcept(false)
 {
     if (!confObj.lookupValue(name, param)){
-        std::cerr << "ctb::GetParam() Error: <" << name << "> lookup failed." << std::endl;
+        std::cerr << tc::redL << "ctb::GetParam() Error: <" << name << "> lookup failed." << tc::none << std::endl;
         return false;
     }
 
