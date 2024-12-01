@@ -16,11 +16,14 @@ DigitalPID::DigitalPID()
     : PIDInitialized_(false)
     , hasBeenReset_(true)
     , TrToBeSetted_(false)
+    , D_(0.0) // Initialize D_ to zero
+    , I_(0.0) // Initialize I_ to zero
 {
     u_.resize(2, 0.0);
     e_.resize(3, 0.0);
     y_.resize(2, 0.0);
 }
+
 
 DigitalPID::DigitalPID(const PIDGains& gains, double sampleTime, double saturation)
     : Ts_(sampleTime)
@@ -141,8 +144,9 @@ double DigitalPID::Compute(double ref, double fbk)
         if (g_.Kd != 0.0 && g_.Kp != 0.0) {
             double Td = g_.Kd / g_.Kp;
             D_ = Td / (Td + g_.N * Ts_) * D_ - g_.Kp * Td * g_.N / (Td + g_.N * Ts_) * (ydiff);
+        } else {
+            D_ = 0.0; // Ensure D_ is zero when derivative term is not computed
         }
-
         double v = g_.Kp * e_[0] + I_ + D_ + g_.Kff * ref;
         if (std::abs(v) > uMax_) {
             u_[0] = v / std::abs(v) * uMax_;
