@@ -52,8 +52,24 @@ void DigitalPID::Initialize(const PIDGains& gains, double sampleTime, double sat
     SetGains(gains);
     SetErrorFunction(DifferenceFunctor<double>());
     PIDInitialized_ = true;
+
+    // Validate Ki and Tr
+    if (g_.Ki != 0.0) {
+        // Check if Tr is less than or equal to Ts_
+        if (g_.Tr <= Ts_) {
+            std::cerr << "Warning: Tr (" << g_.Tr << ") is less than or equal to the sampling time Ts_ (" << Ts_ << "), which may cause instability." << std::endl;
+        }
+
+        // Alternatively, check if Ki / Tr is too large
+        double ratio = g_.Ki / g_.Tr;
+        if (ratio > 1000.0) { // Threshold can be adjusted based on system specifics
+            std::cerr << "Warning: Ki / Tr ratio (" << ratio << ") is very high, which may cause instability." << std::endl;
+        }
+    }
+
     Reset();
 }
+
 
 PIDGains DigitalPID::GetGains() const
 {
@@ -158,18 +174,20 @@ double DigitalPID::Compute(double ref, double fbk)
         //		"e = %+lf I = %+lf D = %+lf uff = %+lf v = %+lf u = %+lf ydiff = %+lf", e[0], I_, D_, Kff_ * ref, v, u[0], ydiff);
         if (g_.Ki != 0.0) {
             if (g_.Tr == 0.0) {
-                std::cerr << "\r Set Tr different from zero to add integral part " << std::flush;
-                TrToBeSetted_ = true;
-                I_ = 0;
+                std::cerr << "Error: Tr cannot be zero when Ki is non-zero. Disabling integral term." << std::endl;
+                I_ = 0.0;
             } else {
-                if (TrToBeSetted_) {
-                    std::cerr << "\r Added Integral Part                                    " << std::flush;
-                    TrToBeSetted_ = false;
+                // Update integral term with anti-windup correction
+                I_ += (g_.Ki * Ts_) * e_[0] + (Ts_ / g_.Tr) * (u_[0] - v);
+
+                // Check for NaN or Inf in I_
+                if (std::isnan(I_) || std::isinf(I_)) {
+                    std::cerr << "Warning: Integral term I_ became invalid (NaN or Inf). Resetting I_ to 0." << std::endl;
+                    I_ = 0.0;
                 }
-                I_ = I_ + (g_.Ki * Ts_) * e_[0] + (Ts_ / g_.Tr) * (u_[0] - v);
             }
         } else {
-            I_ = 0;
+            I_ = 0.0; // Ensure I_ is zero when Ki is zero
         }
         return u_[0];
     } else {
