@@ -16,11 +16,14 @@ DigitalPID::DigitalPID()
     : PIDInitialized_(false)
     , hasBeenReset_(true)
     , TrToBeSetted_(false)
+    , D_(0.0) // Initialize D_ to zero
+    , I_(0.0) // Initialize I_ to zero
 {
     u_.resize(2, 0.0);
     e_.resize(3, 0.0);
     y_.resize(2, 0.0);
 }
+
 
 DigitalPID::DigitalPID(const PIDGains& gains, double sampleTime, double saturation)
     : Ts_(sampleTime)
@@ -49,8 +52,25 @@ void DigitalPID::Initialize(const PIDGains& gains, double sampleTime, double sat
     SetGains(gains);
     SetErrorFunction(DifferenceFunctor<double>());
     PIDInitialized_ = true;
+
+    // Validate Ki and Tr
+    if (g_.Ki != 0.0) {
+        // Check if Tr is less than or equal to Ts_
+        if (g_.Tr <= Ts_) {
+            throw std::invalid_argument("Error: Tr (" + std::to_string(g_.Tr) + ") is less than or equal to the sampling time Ts_ (" + std::to_string(Ts_) + "), which may cause instability.");
+        }
+
+        // Alternatively, check if Ki / Tr is too large
+        double ratio = g_.Ki / g_.Tr;
+        if (ratio > 1000.0) { // Threshold can be adjusted based on system specifics
+            throw std::invalid_argument("Error: Ki / Tr ratio (" + std::to_string(ratio) + ") is very high, which may cause instability.");
+        }
+    }
+
     Reset();
 }
+
+
 
 PIDGains DigitalPID::GetGains() const
 {
@@ -141,8 +161,9 @@ double DigitalPID::Compute(double ref, double fbk)
         if (g_.Kd != 0.0 && g_.Kp != 0.0) {
             double Td = g_.Kd / g_.Kp;
             D_ = Td / (Td + g_.N * Ts_) * D_ - g_.Kp * Td * g_.N / (Td + g_.N * Ts_) * (ydiff);
+        } else {
+            D_ = 0.0; // Ensure D_ is zero when derivative term is not computed
         }
-
         double v = g_.Kp * e_[0] + I_ + D_ + g_.Kff * ref;
         if (std::abs(v) > uMax_) {
             u_[0] = v / std::abs(v) * uMax_;
@@ -154,18 +175,20 @@ double DigitalPID::Compute(double ref, double fbk)
         //		"e = %+lf I = %+lf D = %+lf uff = %+lf v = %+lf u = %+lf ydiff = %+lf", e[0], I_, D_, Kff_ * ref, v, u[0], ydiff);
         if (g_.Ki != 0.0) {
             if (g_.Tr == 0.0) {
-                std::cerr << "\r Set Tr different from zero to add integral part " << std::flush;
-                TrToBeSetted_ = true;
-                I_ = 0;
+                std::cerr << "Error: Tr cannot be zero when Ki is non-zero. Disabling integral term." << std::endl;
+                I_ = 0.0;
             } else {
-                if (TrToBeSetted_) {
-                    std::cerr << "\r Added Integral Part                                    " << std::flush;
-                    TrToBeSetted_ = false;
+                // Update integral term with anti-windup correction
+                I_ += (g_.Ki * Ts_) * e_[0] + (Ts_ / g_.Tr) * (u_[0] - v);
+
+                // Check for NaN or Inf in I_
+                if (std::isnan(I_) || std::isinf(I_)) {
+                    std::cerr << "Warning: Integral term I_ became invalid (NaN or Inf). Resetting I_ to 0." << std::endl;
+                    I_ = 0.0;
                 }
-                I_ = I_ + (g_.Ki * Ts_) * e_[0] + (Ts_ / g_.Tr) * (u_[0] - v);
             }
         } else {
-            I_ = 0;
+            I_ = 0.0; // Ensure I_ is zero when Ki is zero
         }
         return u_[0];
     } else {
