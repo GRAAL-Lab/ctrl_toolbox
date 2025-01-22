@@ -57,18 +57,19 @@ void DigitalPID::Initialize(const PIDGains& gains, double sampleTime, double sat
     if (g_.Ki != 0.0) {
         // Check if Tr is less than or equal to Ts_
         if (g_.Tr <= Ts_) {
-            std::cerr << "Warning: Tr (" << g_.Tr << ") is less than or equal to the sampling time Ts_ (" << Ts_ << "), which may cause instability." << std::endl;
+            throw std::invalid_argument("Error: Tr (" + std::to_string(g_.Tr) + ") is less than or equal to the sampling time Ts_ (" + std::to_string(Ts_) + "), which may cause instability.");
         }
 
         // Alternatively, check if Ki / Tr is too large
         double ratio = g_.Ki / g_.Tr;
         if (ratio > 1000.0) { // Threshold can be adjusted based on system specifics
-            std::cerr << "Warning: Ki / Tr ratio (" << ratio << ") is very high, which may cause instability." << std::endl;
+            throw std::invalid_argument("Error: Ki / Tr ratio (" + std::to_string(ratio) + ") is very high, which may cause instability.");
         }
     }
 
     Reset();
 }
+
 
 
 PIDGains DigitalPID::GetGains() const
