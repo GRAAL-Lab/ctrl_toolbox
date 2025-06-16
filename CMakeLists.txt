@@ -29,7 +29,7 @@ add_library(ctrl_toolbox SHARED
     src/kalman_filter/MeasurementKalmanFilter.cc
 )
 
-target_link_libraries(ctrl_toolbox rml Geographic)
+target_link_libraries(ctrl_toolbox rml GeographicLib)
 
 set_target_properties(ctrl_toolbox PROPERTIES LINKER_LANGUAGE CXX)
 
