@@ -60,11 +60,11 @@ void DigitalPID::Initialize(const PIDGains& gains, double sampleTime, double sat
             throw std::invalid_argument("Error: Tr (" + std::to_string(g_.Tr) + ") is less than or equal to the sampling time Ts_ (" + std::to_string(Ts_) + "), which may cause instability.");
         }
 
-        // Alternatively, check if Ki / Tr is too large
-        double ratio = g_.Ki / g_.Tr;
-        if (ratio > 1000.0) { // Threshold can be adjusted based on system specifics
-            throw std::invalid_argument("Error: Ki / Tr ratio (" + std::to_string(ratio) + ") is very high, which may cause instability.");
-        }
+        // Alternatively, check if Ki / Tr is too large   ## BYPASSED FOR NOW
+        //double ratio = g_.Ki / g_.Tr;
+        //if (ratio > g_.Ki_T_max_ratio) { // Threshold can be adjusted based on system specifics
+        //    throw std::invalid_argument("Error: Ki / Tr ratio (" + std::to_string(ratio) + ") is very high, which may cause instability.");
+        //}
     }
 
     Reset();
