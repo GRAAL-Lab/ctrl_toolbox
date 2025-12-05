@@ -13,3 +13,7 @@ The list of components is the following:
 * **rml**: Robotic Mathematical Library (https://bitbucket.org/isme_robotics/rml/src)
 * **Geographic Library**: `sudo apt-get install -y libgeographic-dev`)
 * **libconfig++**: `sudo apt install libconfig++-dev`
+
+### License
+
+The software is released under the MIT License, as reported in the [LICENSE.md](/LICENSE.md) file.
