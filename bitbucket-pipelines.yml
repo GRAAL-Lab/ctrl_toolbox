@@ -1,0 +1,26 @@
+image: 
+  name: graalunige/devel-testbench
+  username: $DOCKER_HUB_USERNAME_WANDERFRA
+  password: $DOCKER_HUB_PASSWORD_WANDERFRA
+  email: $DOCKER_HUB_EMAIL_WANDERFRA
+
+pipelines:
+  default:
+    - step:
+        script: # Modify the commands below to build your repository.
+          - sudo apt install -y libgeographiclib-dev
+          - sudo apt install -y libconfig++-dev
+          - mkdir dependencies
+          - cd dependencies
+          - git clone git@bitbucket.org:isme_robotics/rml.git 
+          - cd rml
+          - cmake .
+          - make install
+          #- cd ..
+          #- git clone git@bitbucket.org:isme_robotics/ctrl_toolbox.git
+          #- cd ctrl_toolbox          
+          #- cmake .
+          #- make install
+          - cd ../..
+          - cmake .
+          - make 

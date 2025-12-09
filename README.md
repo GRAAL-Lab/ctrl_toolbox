@@ -10,10 +10,14 @@ The list of components is the following:
 
 ## Dependencies
 
-* **rml**: Robotic Mathematical Library (https://bitbucket.org/isme_robotics/rml/src)
 * **Geographic Library**: `sudo apt-get install -y libgeographic-dev`)
 * **libconfig++**: `sudo apt install libconfig++-dev`
+* **rml**: Robotic Mathematical Library (https://bitbucket.org/isme_robotics/rml/src)
 
 ### License
 
 The software is released under the MIT License, as reported in the [LICENSE.md](/LICENSE.md) file.
+
+### Mantainer
+
+This project is mantained by the [GRAAL Laboratory](https://www.graal.dibris.unige.it), University of Genoa (Italy).
