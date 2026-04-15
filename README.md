@@ -19,7 +19,7 @@
 - C++17 compiler
 - `GeographicLib`
 - `libconfig++`
-- `rml` (Robotic Mathematical Library): <https://bitbucket.org/isme_robotics/rml/src>
+- `rml` (Robotic Mathematical Library): <https://github.com/GRAAL-Lab/rml.git>
 
 On Debian/Ubuntu, install system dependencies with:
 
@@ -118,4 +118,4 @@ This project is released under the MIT License. See [LICENSE.md](LICENSE.md).
 
 ## Maintainer
 
-Maintained by [GRAAL Laboratory](https://www.graal.dibris.unige.it), University of Genoa (Italy).
+Maintained by [GRAAL Laboratory](https://graal.dibris.unige.it), University of Genoa (Italy).

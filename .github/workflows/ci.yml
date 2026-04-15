@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    container:
+      image: graalunige/devel-testbench
+      credentials:
+        username: ${{ secrets.DOCKER_HUB_USERNAME_GRAAL }}
+        password: ${{ secrets.DOCKER_HUB_PASSWORD_GRAAL }}
+
+    steps:
+      - name: Check out main repository
+        uses: actions/checkout@v5
+
+      - name: Install system dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y libgeographiclib-dev libconfig++-dev
+
+      - name: Clone and install rml
+        run: |
+          mkdir -p dependencies
+          cd dependencies
+          git clone https://github.com/GRAAL-Lab/rml.git
+          cd rml
+          cmake .
+          sudo make install
+
+      - name: Configure
+        run: cmake .
+
+      - name: Build
+        run: make
