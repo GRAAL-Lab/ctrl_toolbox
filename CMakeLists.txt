@@ -1,7 +1,7 @@
 # RML: Robotic Matematical Library
 
 # At LEAST 2.8 but newer is better
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(ctrl_toolbox VERSION 1.0 LANGUAGES CXX)
 
 # Must use GNUI stallDirs to install libraries into correct
