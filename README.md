@@ -1,3 +1,5 @@
+![CI](https://github.com/GRAAL-Lab/ctrl_toolbox/actions/workflows/ci.yml/badge.svg)
+
 # Control Toolbox
 
 `ctrl_toolbox` is a C++17 library collecting reusable control-oriented building blocks under the `ctb` namespace.
